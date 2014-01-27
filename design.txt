@@ -1,0 +1,36 @@
+ExSchwarzenegger
+	Drive
+		Modes?
+			Omni
+			Mechanum
+			Traction
+		
+		Encoders
+	Loader
+		Pivot
+			Pistons
+			2 or 3 stage position interface
+		
+		Roller
+			Motors
+			Variable Speed directly from Joystick
+		
+	Catapult
+		Winch
+			Transmission
+				Toggled with Right Trigger + Left Trigger
+				Automatic?
+					After release detect follow through (stop position) and switch to pull back gear
+			Motor
+				Variable Control
+		
+		Position Pot.
+			Checks to see if its at limit and doesn't allow for it to be moved beyond those
+	
+	Operator Interface
+		Left Drive Joystick
+		Right Drive Joystick
+		
+		Gamepad
+			Left Joy
+				
