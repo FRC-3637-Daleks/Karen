@@ -39,7 +39,7 @@ class Karen : public IterativeRobot
 		
 public:
 
-	ExSchwartzinagor(): precisionFactor(0.3) {
+	Karen(): precisionFactor(0.3) {
 		printf("PracticeRobot Constructor Started\n");
 		
 		m_rightFront = new CANJaguar(CAN_PORTS::DRIVE_FRONT_RIGHT);
@@ -233,4 +233,4 @@ private:
 	
 };
 
-START_ROBOT_CLASS(ExSchwartzinagor);
+START_ROBOT_CLASS(Karen);
