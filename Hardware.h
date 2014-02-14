@@ -22,6 +22,7 @@ public:
 	enum {ROLLER_TALONS, WINCH_TALONS};
 };
 
+
 class USB_PORTS
 {
 public:
