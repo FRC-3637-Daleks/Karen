@@ -6,6 +6,7 @@
 #include "WPILib.h"
 #include "Hardware.h"
 #include "Gamepad.h"
+#include "Subsystems/DalekDrive.h"
 
 class Karen : public IterativeRobot
 {
@@ -17,8 +18,7 @@ class Karen : public IterativeRobot
 	Joystick *m_leftStick;			// joystick 2 (tank left stick)
 	GamePad *m_gamePad;				// Gamepad (3) (subsystem controls)
 	
-	CANJaguar *m_rightFront, *m_leftFront, *m_rightRear, *m_leftRear;
-	RobotDrive *m_robotDrive;
+	DalekDrive *m_dalekDrive;
 	
 	Talon *m_winch, *m_roller;	
 	
@@ -26,39 +26,19 @@ class Karen : public IterativeRobot
 	UINT32 m_autoPeriodicLoops;
 	UINT32 m_disabledPeriodicLoops;
 	UINT32 m_telePeriodicLoops;
-	
-	typedef enum {TRACTION_WHEELS, OMNI_WHEELS, MECANUM_WHEELS} Wheel_t;
-	typedef enum {ARCADE_DRIVE, TANK_DRIVE} Drive_t;
-	
-	Wheel_t wheelConfig;
-	Drive_t driveConfig;
-	bool precision;
-	bool squaredInputs;
-	
-	const float precisionFactor;
-		
 public:
 
-	Karen(): precisionFactor(0.3) {
+	Karen() {
 		printf("PracticeRobot Constructor Started\n");
 		
-		m_rightFront = new CANJaguar(CAN_PORTS::DRIVE_FRONT_RIGHT);
-		m_rightRear  = new CANJaguar(CAN_PORTS::DRIVE_REAR_RIGHT);
-		m_leftFront  = new CANJaguar(CAN_PORTS::DRIVE_FRONT_LEFT);
-		m_leftRear   = new CANJaguar(CAN_PORTS::DRIVE_REAR_LEFT);
-		
 		// Set up the robot for two motor drive
-		m_robotDrive = new RobotDrive(m_leftFront, m_leftRear, m_rightFront, m_rightRear);
+		m_dalekDrive = new DalekDrive(DalekDrive::MECANUM_WHEELS, 
+				CAN_PORTS::DRIVE_FRONT_LEFT, CAN_PORTS::DRIVE_FRONT_RIGHT, CAN_PORTS::DRIVE_REAR_LEFT, CAN_PORTS::DRIVE_REAR_RIGHT);
 		
-		m_robotDrive->SetInvertedMotor(RobotDrive::kFrontLeftMotor, false);
-		m_robotDrive->SetInvertedMotor(RobotDrive::kFrontRightMotor, true);
-		m_robotDrive->SetInvertedMotor(RobotDrive::kRearLeftMotor, false);
-		m_robotDrive->SetInvertedMotor(RobotDrive::kRearRightMotor, true);
-		
-		// Define talons
-		
-		//m_winch = new Talon(PWN_PORTS::WINCH_TALONS);
-		
+		(*m_dalekDrive)[DalekDrive::LEFT_FRONT].SetFlip(false);
+		(*m_dalekDrive)[DalekDrive::RIGHT_FRONT].SetFlip(false);
+		(*m_dalekDrive)[DalekDrive::LEFT_REAR].SetFlip(false);
+		(*m_dalekDrive)[DalekDrive::RIGHT_REAR].SetFlip(false);
 		
 		// Define joysticks on the Drivers Station
 		m_rightStick = new Joystick(USB_PORTS::RIGHT_JOY);
@@ -69,12 +49,6 @@ public:
 		m_autoPeriodicLoops = 0;
 		m_disabledPeriodicLoops = 0;
 		m_telePeriodicLoops = 0;
-		
-		driveConfig = ARCADE_DRIVE;
-		wheelConfig = MECANUM_WHEELS;
-		
-		precision = false;
-		squaredInputs = true;
 		
 		printf("Ex-schwartzinagor Constructor Completed\n");
 	}
@@ -128,101 +102,31 @@ public:
 		
 		
 		
-		switch(wheelConfig)
+		switch(m_dalekDrive->GetWheels())
 		{
-		case MECANUM_WHEELS:
-			if(driveConfig == ARCADE_DRIVE)
-				m_robotDrive->MecanumDrive_Cartesian(-deadzone(m_rightStick->GetX() * (squaredInputs? fabs(m_rightStick->GetX()):1.0) * (precision? precisionFactor:1.0)), 
-						deadzone(m_rightStick->GetY()*(squaredInputs? fabs(m_rightStick->GetY()):1.0)*(precision? precisionFactor:1.0)), 
-						deadzone(m_leftStick->GetX()*(squaredInputs? fabs(m_leftStick->GetX()):1.0))*(precision? precisionFactor:1.0));
+		case DalekDrive::MECANUM_WHEELS:
+			if(m_leftStick->GetZ() > 0.5)
+				m_dalekDrive->Drive(-deadzone(m_rightStick->GetX()), deadzone(m_rightStick->GetY()), deadzone(m_leftStick->GetX()));
 			else
 			{
-				float x = ((m_rightStick->GetX() * (squaredInputs? fabs(m_rightStick->GetX()):1.0) * (precision? precisionFactor:1.0)) +
-						(m_leftStick->GetX() * (squaredInputs? fabs(m_leftStick->GetX()):1.0) * (precision? precisionFactor:1.0)))/2;
-				float y = (m_rightStick->GetY()*(squaredInputs? fabs(m_rightStick->GetY()):1.0)*(precision? precisionFactor:1.0) + 
-						(m_leftStick->GetY() * (squaredInputs? fabs(m_leftStick->GetY()):1.0)*(precision? precisionFactor:1.0)))/2;
-				float theta = (m_rightStick->GetY()*(squaredInputs? fabs(m_rightStick->GetY()):1.0)*(precision? precisionFactor:1.0) - 
-						(m_leftStick->GetY() * (squaredInputs? fabs(m_leftStick->GetY()):1.0)*(precision? precisionFactor:1.0)))/2;
-				m_robotDrive->MecanumDrive_Cartesian(-deadzone(x), deadzone(y), theta);
+				float x = ((m_rightStick->GetX()) +
+						(m_leftStick->GetX()))/2;
+				float y = (m_rightStick->GetY()) + 
+						(m_leftStick->GetY())/2;
+				float theta = (m_rightStick->GetY()) - 
+						(m_leftStick->GetY() )/2;
+				m_dalekDrive->Drive(-deadzone(x), deadzone(y), theta);
 			}
 			break;
-		case OMNI_WHEELS:
-		case TRACTION_WHEELS:
-			if(driveConfig == ARCADE_DRIVE)
-				m_robotDrive->ArcadeDrive(deadzone(m_rightStick->GetX())*(precision? precisionFactor:1.0), 
-						deadzone(m_rightStick->GetY())*(precision? precisionFactor:1.0),
-						squaredInputs);
+		case DalekDrive::OMNI_WHEELS:
+		case DalekDrive::TRACTION_WHEELS:
+			if(m_leftStick->GetZ() > 0.5)
+				m_dalekDrive->Drive(0.0, deadzone(m_rightStick->GetY()), deadzone(m_rightStick->GetX()));
 			else
-				m_robotDrive->TankDrive(-deadzone(m_leftStick->GetY()*(precision? precisionFactor:1.0)), 
-						deadzone(m_rightStick->GetY()*(precision? precisionFactor:1.0)), squaredInputs);
+				m_dalekDrive->Drive(-deadzone(m_leftStick->GetY()), deadzone(m_rightStick->GetY()));
 			break;
 		}
-		
-		ButtonUpdate();
-		SmartDashboard::PutBoolean("Precision", precision);
-		SmartDashboard::PutBoolean("Squard_Inputs", squaredInputs);
-		SmartDashboard::PutString("ControlMode", driveConfig == ARCADE_DRIVE? "Arcade":"Tank Drive");
-		SmartDashboard::PutString("Wheel_Setup", wheelConfig == MECANUM_WHEELS? "Mecanum":"Traction");
 	} // TeleopPeriodic(void)
-	
-	
-	void ButtonUpdate()
-	{
-		static bool precisionButton = false;
-		static bool squaredButton = false;
-		
-		// Precision: press either trigger
-		if(m_rightStick->GetTrigger() && m_leftStick->GetTrigger())
-		{
-			precisionButton = true;
-		}
-		else if(precisionButton)
-		{
-			precisionButton = false;
-			precision = !precision;
-			printf("Precision Driving factor set to: %f\n", (float)precisionFactor*(precision));
-		}
-		
-		// Squared Toggle: 
-		if(m_rightStick->GetRawButton(2) && m_leftStick->GetRawButton(2))
-		{
-			squaredButton = true;
-		}
-		else if(squaredButton)
-		{
-			squaredButton = false;
-			squaredInputs = !squaredInputs;
-			printf("Squared Input is set to: %i", (int)squaredInputs);
-		}
-		
-		// If right stick Z is up, activate Arcade Arcade Mode
-		if(m_rightStick->GetZ() > 0.5)
-		{
-			if(driveConfig != ARCADE_DRIVE)
-				printf("Arcade Mode\n");
-			driveConfig = ARCADE_DRIVE;
-		}
-		else
-		{
-			if(driveConfig != TANK_DRIVE)
-				printf("Tank Mode\n");
-			driveConfig = TANK_DRIVE;
-		}
-		
-		// If left stick Z is up, this signifies Mecanum setup 
-		if(m_leftStick->GetZ() > 0.5)
-		{
-			if(wheelConfig != MECANUM_WHEELS)
-				printf("Driving for Mecanum wheels\n");
-			wheelConfig = MECANUM_WHEELS;
-		}
-		else
-		{
-			if(wheelConfig != TRACTION_WHEELS)
-				printf("Driving for traction/omni wheels\n");
-			wheelConfig = TRACTION_WHEELS;
-		}
-	}
 	
 private:
 	const float deadzone(const float in)
