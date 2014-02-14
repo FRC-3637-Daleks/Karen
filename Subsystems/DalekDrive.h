@@ -4,10 +4,10 @@
 #include "WPILib.h"
 
 // functions to be stored in array for quick reference
-float leftFrontAlg(float x, float y, float theta) {return x+y+theta;}
-float rightFrontAlg(float x, float y, float theta) {return y-x-theta;}
-float leftRearAlg(float x, float y, float theta) {return y-x+theta;}
-float rightRearAlg(float x, float y, float theta) {return y+x-theta;}
+inline float leftFrontAlg(float x, float y, float theta) {return x+y+theta;}
+inline float rightFrontAlg(float x, float y, float theta) {return y-x-theta;}
+inline float leftRearAlg(float x, float y, float theta) {return y-x+theta;}
+inline float rightRearAlg(float x, float y, float theta) {return y+x-theta;}
 
 // class to replace RobotDrive
 class DalekDrive
@@ -24,9 +24,9 @@ public:  // static declares/defines
 		typedef float (*MECANUM_FUNCTION)(float, float, float); // function pointer type for converting x y and theta to an individual wheel speed
 		static MECANUM_FUNCTION mecFuncs[N_MOTORS];
 		CANJaguar *motor;
+		int location;
 		bool flip;  // keeps track whether this motor is flipped
 		int *refCount; // used 
-		int location;
 		
 	public:
 		Motor(CANJaguar &m, const int loc, const bool f=false): motor(&m), location(loc), flip(f), refCount(NULL) {};
@@ -59,6 +59,9 @@ public:
 	DalekDrive(const Wheel_t wheelConfig, const Motor m[N_MOTORS]);
 	
 	const Wheel_t GetWheels() const {return wheels;};
+	
+	Motor& operator[] (const UINT8 index) {return motors[index];};
+	const Motor& operator[] (const UINT8 index) const {return motors[index];};
 	
 public:
 	void Drive(const float x, const float y, const float theta);
