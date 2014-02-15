@@ -5,7 +5,7 @@
 #include <cmath>
 #include "WPILib.h"
 #include "Hardware.h"
-#include "Gamepad.h"
+#include "Subsystems/Gamepad.h"
 #include "Subsystems/DalekDrive.h"
 #include "Subsystems/OperatorConsole.h"
 
@@ -15,7 +15,7 @@ class Karen : public IterativeRobot
 	//RobotDrive *m_robotDrive;		// robot will use PWM 1-4 for drive motors
 	
 	// Declare variables for the two joysticks being used
-	OperatorConsole
+	OperatorConsole *OC;
 	
 	DalekDrive *m_dalekDrive;
 	
@@ -40,16 +40,14 @@ public:
 		(*m_dalekDrive)[DalekDrive::RIGHT_REAR].SetFlip(false);
 		
 		// Define joysticks on the Drivers Station
-		m_rightStick = new Joystick(USB_PORTS::RIGHT_JOY);
-		m_leftStick = new Joystick(USB_PORTS::LEFT_JOY);
-		m_gamePad = new GamePad(USB_PORTS::GAMEPAD);
+		OC = new OperatorConsole(OperatorConsole::ARCADE_DRIVE, USB_PORTS::RIGHT_JOY, USB_PORTS::LEFT_JOY, USB_PORTS::GAMEPAD);
 		
 		// Initialize counters to record the number of loops completed in autonomous and teleop modes
 		m_autoPeriodicLoops = 0;
 		m_disabledPeriodicLoops = 0;
 		m_telePeriodicLoops = 0;
 		
-		printf("Ex-schwartzinagor Constructor Completed\n");
+		printf("Karen Constructor Completed\n");
 	}
 	
 	/********************************** Init Routines *************************************/
@@ -99,39 +97,12 @@ public:
 		// increment the number of teleop periodic loops completed
 		m_telePeriodicLoops++;
 		
+		if(OC->GetDrive() == OperatorConsole::ARCADE_DRIVE)
+			m_dalekDrive->Drive(OC->GetX(), OC->GetY(), OC->GetTheta());
+		else
+			m_dalekDrive->Drive(OC->GetLeft(), OC->GetRight());
 		
-		
-		switch(m_dalekDrive->GetWheels())
-		{
-		case DalekDrive::MECANUM_WHEELS:
-			if(m_leftStick->GetZ() > 0.5)
-				m_dalekDrive->Drive(-deadzone(m_rightStick->GetX()), deadzone(m_rightStick->GetY()), deadzone(m_leftStick->GetX()));
-			else
-			{
-				float x = ((m_rightStick->GetX()) +
-						(m_leftStick->GetX()))/2;
-				float y = (m_rightStick->GetY()) + 
-						(m_leftStick->GetY())/2;
-				float theta = (m_rightStick->GetY()) - 
-						(m_leftStick->GetY() )/2;
-				m_dalekDrive->Drive(-deadzone(x), deadzone(y), theta);
-			}
-			break;
-		case DalekDrive::OMNI_WHEELS:
-		case DalekDrive::TRACTION_WHEELS:
-			if(m_leftStick->GetZ() > 0.5)
-				m_dalekDrive->Drive(0.0, deadzone(m_rightStick->GetY()), deadzone(m_rightStick->GetX()));
-			else
-				m_dalekDrive->Drive(-deadzone(m_leftStick->GetY()), deadzone(m_rightStick->GetY()));
-			break;
-		}
 	} // TeleopPeriodic(void)
-	
-private:
-	const float deadzone(const float in)
-	{
-		return fabs(in) > DEADZONE? in:0.0;
-	}
 	
 	
 };

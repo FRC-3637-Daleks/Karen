@@ -14,20 +14,21 @@ class OperatorConsole
 public:
 	typedef enum {ARCADE_DRIVE, TANK_DRIVE} Drive_t;
 private:
+	Drive_t drive;
 	Joystick *m_leftStick, *m_rightStick;
 	GamePad *m_gamePad;
 	bool allocated;
 	
 private:
-	float precisionFactor;
 	bool squared;
-	Drive_t drive;
+	float precisionFactor;
 	bool engaged;
-	int rollerPos;	
+	int rollerPos;
 	
 public:
 	OperatorConsole(const Drive_t driveConfig, Joystick *left, Joystick *right, GamePad *pad): 
-		m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false) {};
+		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), 
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos() {};
 	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad) 
 		{OperatorConsole(driveConfig, &left, &right, &pad);};
 	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad) 
@@ -52,6 +53,8 @@ public:
 	
 	void SetPrecision(const float f) {precisionFactor = ceiling(f);};
 	const float GetPrecision() {return precisionFactor;};
+	
+	const int GetDrive() const  {return drive;};
 	
 private:
 	static const float deadzone(const float f) {return fabs(f) < DEADZONE? 0.0:f;};
