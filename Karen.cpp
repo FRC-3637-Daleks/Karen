@@ -5,7 +5,7 @@
 #include <cmath>
 #include "WPILib.h"
 #include "Hardware.h"
-#include "Gamepad.h"
+#include "Subsystems/Gamepad.h"
 #include "Subsystems/DalekDrive.h"
 #include "Subsystems/OperatorConsole.h"
 
@@ -15,7 +15,7 @@ class Karen : public IterativeRobot
 	//RobotDrive *m_robotDrive;		// robot will use PWM 1-4 for drive motors
 	
 	// Declare variables for the two joysticks being used
-	OperatorConsole
+	//OperatorConsole foo;
 	
 	DalekDrive *m_dalekDrive;
 	
