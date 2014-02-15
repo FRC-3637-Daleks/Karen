@@ -8,8 +8,6 @@
 #ifndef HARDWARE_H_
 #define HARDWARE_H_
 
-#define DEADZONE 0.05
-
 class CAN_PORTS
 {
 public:
@@ -19,7 +17,13 @@ public:
 class PWM_PORTS
 {
 public:
-	enum {ROLLER_TALONS, WINCH_TALONS};
+	enum {ROLLER_TALONS=1, WINCH_TALONS=3};
+};
+
+class SOLENOIDS
+{
+public:
+	enum {LATCH_IN=1, LATCH_OUT, CLUTCH_ON, CLUTCH_OFF /*not for use*/, RIGHT_PISTON_IN, RIGHT_PISTON_OUT, LEFT_PISTON_IN, LEFT_PISTON_OUT};
 };
 
 

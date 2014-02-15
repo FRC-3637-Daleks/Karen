@@ -7,6 +7,7 @@
 #include "Hardware.h"
 #include "Gamepad.h"
 #include "Subsystems/DalekDrive.h"
+#include "Subsystems/OperatorConsole.h"
 
 class Karen : public IterativeRobot
 {
@@ -14,9 +15,7 @@ class Karen : public IterativeRobot
 	//RobotDrive *m_robotDrive;		// robot will use PWM 1-4 for drive motors
 	
 	// Declare variables for the two joysticks being used
-	Joystick *m_rightStick;			// joystick 1 (arcade stick or right tank stick)
-	Joystick *m_leftStick;			// joystick 2 (tank left stick)
-	GamePad *m_gamePad;				// Gamepad (3) (subsystem controls)
+	OperatorConsole
 	
 	DalekDrive *m_dalekDrive;
 	
