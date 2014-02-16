@@ -28,7 +28,7 @@ public:
 			float minDistance, DistanceUnit units = kInches);
 	Maxbotix(UINT8 sensorModuleNumber, UINT32 sensorChannel, float maxVoltage, 
 			float minDistance, DistanceUnit units = kInches);
-	virtual ~Maxbotix();
+	virtual ~Maxbotix() {};
 
 	float GetRangeInInches();
 	float GetRangeInCM();

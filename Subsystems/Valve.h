@@ -11,7 +11,7 @@ public:
 		  uint8_t bModuleNumber, uint32_t bChannel, bool open=true);
 	Valve(Solenoid *aSource, Solenoid *bSource, bool open=true);
 	Valve(Solenoid &aSource, Solenoid &bSource, bool open=true);
-	virtual ~Valve();
+	virtual ~Valve() {};
 	
 	bool isOpen();
 	bool isClosed();

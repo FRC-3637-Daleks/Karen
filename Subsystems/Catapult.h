@@ -31,6 +31,7 @@ public:
 	void Fire();
 	void prepareFire();
 	
+	
 private:
 	Talon *m_winch;
 	Encoder *m_step;

@@ -4,10 +4,10 @@
 #include "WPILib.h"
 
 // functions to be stored in array for quick reference
-inline float leftFrontAlg(float x, float y, float theta) {return x+y+theta;}
-inline float rightFrontAlg(float x, float y, float theta) {return y-x-theta;}
-inline float leftRearAlg(float x, float y, float theta) {return y-x+theta;}
-inline float rightRearAlg(float x, float y, float theta) {return y+x-theta;}
+float leftFrontAlg(float x, float y, float theta);
+float rightFrontAlg(float x, float y, float theta);
+float leftRearAlg(float x, float y, float theta);
+float rightRearAlg(float x, float y, float theta);
 
 // class to replace RobotDrive
 class DalekDrive
@@ -20,9 +20,10 @@ public:  // static declares/defines
 	// Generic motor class which facilitates giving all wheels the same orders in different configurations
 	class Motor
 	{
-	private:
+	public:
 		typedef float (*MECANUM_FUNCTION)(float, float, float); // function pointer type for converting x y and theta to an individual wheel speed
 		static MECANUM_FUNCTION mecFuncs[N_MOTORS];
+	private:
 		CANJaguar *motor;
 		int location;
 		bool flip;  // keeps track whether this motor is flipped
@@ -40,10 +41,17 @@ public:  // static declares/defines
 		void SetFlip(const bool b) {flip = b;};
 		const bool GetFlip() const {return flip;};
 		
+		const int GetLocation() const {return location;};
+		CANJaguar *GetCan() const {return motor;};
+		
 	public:
 		CANJaguar *operator-> () const {return motor;};
 		void SetSpeed(const float speed) {if(motor) motor->Set(speed*(flip? -1:1));};
-		void SetMecSpeed(const float x, const float y, const float theta) {SetSpeed(mecFuncs[location](x, y, theta));};
+		void SetMecSpeed(const float x, const float y, const float theta) 
+		{
+			//printf("DalekDrive::Motor::SetMecSpeed(%f, %f, %f)\nlocation=%d\nmecFuncs[location]=%p\n", x, y, theta, location, mecFuncs[location]);
+			SetSpeed((mecFuncs[location])(x, y, theta));
+		};
 		
 	public:
 		~Motor();
@@ -66,6 +74,9 @@ public:
 public:
 	void Drive(const float x, const float y, const float theta);
 	void Drive(const float left, const float right);
+	
+public:
+	void printMotors();
 };
 
 #endif /*_DALEK_DRIVE_H_*/

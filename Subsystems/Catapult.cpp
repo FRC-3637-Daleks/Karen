@@ -14,7 +14,7 @@ Catapult::Catapult(Talon *winch, Encoder *step,
 	m_latchEngage       = false;
 	m_stopActive         = false;
 	m_needFree           = false;
-	m_backOffAmt         = 10;
+	m_backOffAmt         = 100;
 	m_step->Start();
 }
 
@@ -31,7 +31,7 @@ Catapult::Catapult(Talon &winch, Encoder &step,
 	m_latchEngage       = false;
 	m_stopActive         = false;
 	m_needFree           = false;
-	m_backOffAmt         = 10;
+	m_backOffAmt         = 100;
 	m_step->Start();
 }
 
@@ -48,7 +48,7 @@ Catapult::Catapult(UINT32 winch, UINT32 stepA, UINT32 stepB,
 	m_latchEngage        = false;
 	m_stopActive         = false;
 	m_needFree           = true;
-	m_backOffAmt         = 10;
+	m_backOffAmt         = 100;
 	m_step->Start();
 }
 
@@ -67,10 +67,13 @@ Catapult::isAtStop()
 bool
 Catapult::lockedAndloaded()
 {
-	if(isAtStop() &&
+	if(//isAtStop() &&
 	   isLatched() &&
 	   m_shift->isOpen())
+	{
+		m_winch->Set(0.0);
 		return true;
+	}
 	return false;
 }
 
@@ -85,24 +88,30 @@ Catapult::Fire()
 void
 Catapult::prepareFire()
 {
-	static UINT32 cnt;
+	static UINT32 cnt=0;
 	
-	if(!isAtStop()) {
+	if(!isAtStop() && !isLatched()) {
 		m_shift->Close();
-		m_winch->Set(0.2);
+		m_winch->Set(0.4);
 	}
-	else if(isLatched()) {
+	else if(!isLatched()) {
 		m_winch->Set(0.0);
 		m_latch->Close();
 	}
-	else {
+	else if(!lockedAndloaded()){
 		if(cnt == 0)
 			cnt = m_step->Get();
-		m_winch->Set(-0.1);
+		printf("cnt: %d\ncurrent encoder: %d\nabsolute value of the difference of these: %d", cnt, m_step->Get(), abs(m_step->Get() - cnt));
+		m_winch->Set(-0.5);
 		if(abs(m_step->Get() - cnt) > m_backOffAmt) {
+			printf("Just for kicks\n");
 			m_winch->Set(0.0);
 			m_shift->Open();
 			cnt = 0;
 		}
 	}
+	/*else
+	{
+		m_winch->Set(0.0);
+	}*/
 }

@@ -61,7 +61,7 @@ const int OperatorConsole::GetRollerPosition()
 	{
 		Shoulder1 = false;
 		Shoulder2 = false;
-		return --rollerPos < PICKUP_DOWN? rollerPos=0:rollerPos;
+		return --rollerPos < Pickup::PICKUP_DOWN? rollerPos=0:rollerPos;
 	}
 	else if(m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER))
 	{
@@ -71,7 +71,7 @@ const int OperatorConsole::GetRollerPosition()
 	{
 		Shoulder2 = false;
 		Shoulder1 = false;
-		return ++rollerPos > PICKUP_UP? rollerPos=0:rollerPos;
+		return ++rollerPos > Pickup::PICKUP_UP? rollerPos=0:rollerPos;
 	}
 	
 	return rollerPos; 

@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include "Gamepad.h"
+#include "Pickup.h"
+#include "Catapult.h"
 #include "WPILib.h"
 
 #define DEADZONE 0.05
-
-enum {PICKUP_DOWN, PICKUP_MIDDLE, PICKUP_UP};  // temporary until there is a Pickup header file
 
 class OperatorConsole
 {
@@ -28,11 +28,13 @@ private:
 public:
 	OperatorConsole(const Drive_t driveConfig, Joystick *left, Joystick *right, GamePad *pad): 
 		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), 
-		squared(true), precisionFactor(1.0), engaged(false), rollerPos() {};
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
+	
 	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad) 
 		{OperatorConsole(driveConfig, &left, &right, &pad);};
+	
 	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad) 
-		{OperatorConsole(driveConfig, new Joystick(left), new Joystick(right), new GamePad(pad));};
+		{OperatorConsole(driveConfig, new Joystick(left), new Joystick(right), new GamePad(pad)); allocated = true;};
 	
 public:
 	const float GetX() const;
