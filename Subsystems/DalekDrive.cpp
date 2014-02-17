@@ -15,7 +15,7 @@ DalekDrive::Motor &DalekDrive::Motor::operator =(Motor m)
 	printf("precondition\nDalekDrive::Motor::operator= (.ref: %d)\n this.ref: %d\n", *m.refCount, *refCount);
 	std::swap(motor, m.motor);
 	std::swap(refCount, m.refCount);
-	refCount? *refCount:NULL;
+	refCount? ++*refCount:NULL;
 	std::swap(flip, m.flip);
 	std::swap(location, m.location);
 	printf("postcondition\nDalekDrive::Motor::operator= (.ref: %d)\n this.ref: %d\n", *m.refCount, *refCount);
@@ -26,6 +26,7 @@ DalekDrive::Motor::~Motor()
 {
 	if(refCount)  // sees if this has a reference counter pointer
 	{
+		printf("Destroying shared motor[%d] with %d references\n", location, *refCount);
 		if(!--*refCount && motor)  // if it does it subtracts one from it and checks to see if it's the last one
 			delete motor;   // delets motor if necessary
 		delete refCount;
@@ -33,10 +34,17 @@ DalekDrive::Motor::~Motor()
 }
 
 
-DalekDrive::DalekDrive(const Wheel_t wheelConfig, const DalekDrive::Motor m [])
+void DalekDrive::init(const Wheel_t wheelConfig, const DalekDrive::Motor m [])
 {
+	printMotors();
 	for(UINT8 i = 0; i < N_MOTORS; i++)
 		motors[i] = m[i];
+	printMotors();
+}
+
+DalekDrive::DalekDrive(const Wheel_t wheelConfig, const DalekDrive::Motor m[])
+{
+	init(wheelConfig, m);
 }
 
 DalekDrive::DalekDrive(const Wheel_t wheelConfig, 
@@ -45,14 +53,20 @@ DalekDrive::DalekDrive(const Wheel_t wheelConfig,
 		const Motor & leftRear, 
 		const Motor & rightRear)
 {
+	printf("DalekDrive Reference Constructor\nPrecondition");
+	printMotors();
 	Motor ms[] = {leftFront, rightFront, leftRear, rightRear};
-	DalekDrive(wheelConfig, ms);
+	init(wheelConfig, ms);
+	printf("Post condtion\n");
+	printMotors();
 	// calls alternate constructor with parameters rearranged
 }
 
 DalekDrive::DalekDrive(const Wheel_t wheelConfig, const UINT8 leftFront, const UINT8 rightFront, const UINT8 leftRear, const UINT8 rightRear)
 {
-	DalekDrive(wheelConfig, Motor(leftFront, LEFT_FRONT), Motor(rightFront, RIGHT_FRONT), Motor(leftRear, LEFT_REAR), Motor(rightRear, RIGHT_REAR));
+	printf("DalekDrive Port Constructor\n");
+	Motor ms[] = {Motor(leftFront, LEFT_FRONT), Motor(rightFront, RIGHT_FRONT), Motor(leftRear, LEFT_REAR), Motor(rightRear, RIGHT_REAR)};
+	init(wheelConfig, ms);
 	// calls alternate constructor with paramaters rearranged
 }
 
@@ -77,7 +91,7 @@ void DalekDrive::printMotors()
 	printf("Printing data from DalekDrive::motors\n");
 	for(UINT8 i = 0; i < N_MOTORS; i++)
 	{
-		printf("motor[%i]: location=%d, CAN-Pointer=%p\n", i, motors[i].GetLocation(), motors[i].GetCan());	
+		printf("motor[%d]: location=%d, CAN-Pointer=%p\n", i, motors[i].GetLocation(), motors[i].GetCan());	
 	}
 }
 

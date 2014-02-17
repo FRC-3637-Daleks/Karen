@@ -61,6 +61,8 @@ private:  // data members
 	Motor motors[N_MOTORS];  //motor array
 	Wheel_t wheels; // Defines whether it every supplies the Motors and X val
 	
+private:
+	void init(const Wheel_t wheelConfig, const Motor m[N_MOTORS]);
 public:
 	DalekDrive(const Wheel_t wheelConfig, Motor const &leftFront, Motor const &rightFront, Motor const &leftRear, Motor const &rightRear);
 	DalekDrive(const Wheel_t wheelConfig, const UINT8 leftFront, const UINT8 rightFront, const UINT8 leftRear, const UINT8 rightRear);
