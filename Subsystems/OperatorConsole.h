@@ -30,11 +30,13 @@ public:
 		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), 
 		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
 	
-	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad) 
-		{OperatorConsole(driveConfig, &left, &right, &pad);};
+	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad):
+		drive(driveConfig), m_leftStick(&left), m_rightStick(&right), m_gamePad(&pad), allocated(false), 
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
 	
-	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad) 
-		{OperatorConsole(driveConfig, new Joystick(left), new Joystick(right), new GamePad(pad)); allocated = true;};
+	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad):
+		drive(driveConfig), m_leftStick(new Joystick(left)), m_rightStick(new Joystick(right)), m_gamePad(new GamePad(pad)), allocated(true),
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
 	
 public:
 	const float GetX() const;
@@ -56,6 +58,7 @@ public:
 	void SetPrecision(const float f) {precisionFactor = ceiling(f);};
 	const float GetPrecision() {return precisionFactor;};
 	
+	void SetDrive(const Drive_t d) {drive = d;};
 	const int GetDrive() const  {return drive;};
 	
 private:
