@@ -2,29 +2,38 @@
 #define _PICKUP_H_
 
 #include "WPILib.h"
+#include "Valve.h"
+
 
 class Pickup
 {
 public:
 	enum {PICKUP_DOWN, PICKUP_MIDDLE, PICKUP_UP};
 	
-/*private:
-	Solenoid *m_top;
-	Solenoid *m_bottom;
+private:
+	Valve *m_direction;
+	Valve *m_stop;
 	Talon *m_roller;
-	DigitalInput *m_middle;
+	DigitalInput *m_middleLeft;
+	DigitalInput *m_middleRight;
 	
 	bool allocated;
 	int targetPos;
 	int location;
 	
 public:
-	Pickup(Solenoid * const top, Solenoid * const bottom, Talon * const roller, DigitalInput *mid, const int start): 
-		m_top(top), m_bottom(bottom), m_roller(roller), m_middle(mid), allocated(false), targetPos(start), location(start) {};
-	Pickup(Solenoid& top, Solenoid& bottom, Talon& roller, DigitalInput& mid, const int start)
-	{Pickup(&top, &bottom, &roller, &mid, start);};
-	Pickup(const UINT8 top, const UINT8 bottom, const UINT8 roller, const UINT8 mid, const int start)
-	{Pickup(new Solenoid(top), new Solenoid(bottom), new Talon(roller), new DigitalInput(mid), start); allocated = true;};
+	Pickup(Valve * const direction, Valve * const stop, Talon * const roller, 
+			DigitalInput *midLeft, DigitalInput *midRight, const int start): 
+		m_direction(direction), m_stop(stop), m_roller(roller), m_middleLeft(midLeft), m_middleRight(midRight), allocated(false), targetPos(start), location(start) {};
+	
+	Pickup(Valve& direction, Valve& stop, Talon& roller, 
+			DigitalInput& midLeft, DigitalInput& midRight, const int start):
+		m_direction(&direction), m_stop(&stop), m_roller(&roller), m_middleLeft(&midLeft), m_middleRight(&midRight), allocated(false), targetPos(start), location(start) {};
+	
+	Pickup(const UINT8 top, const UINT8 bottom, const UINT8 stop_a, const UINT8 stop_b, const UINT8 roller,
+			const UINT8 midLeft, const UINT8 midRight, const int start):
+		m_direction(new Valve(top, bottom)), m_stop(new Valve(stop_a, stop_b)), m_roller(new Talon(roller)), 
+		m_middleLeft(new DigitalInput(midLeft)), m_middleRight(new DigitalInput(midRight)), allocated(true), targetPos(start), location(start) {};
 	
 public:
 	void Up();
@@ -33,14 +42,13 @@ public:
 	
 	const bool SetPos(const int pos); // returns true if it's at the spot
 	const int GetTarget() const {return targetPos;};   // returns the current target position
-	const int GetConfig() const;	// returns the current location of the piston
+	const int GetLocation() const {return location;};	// returns the current location of the piston
 	
 public:
 	void SetRoller(const float vel) {if(m_roller) m_roller->Set(vel);};
 	
 public:
 	~Pickup();
-	*/
 };
 
 
