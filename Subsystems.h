@@ -7,4 +7,6 @@
 #include "Subsystems/DalekDrive.h"
 #include "Subsystems/OperatorConsole.h"
 
+//#define SHIT_MODE 1
+
 #endif /*_SUBSYSTEMS_H_*/
