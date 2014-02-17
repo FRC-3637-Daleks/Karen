@@ -15,19 +15,26 @@ class Karen : public IterativeRobot
 	// Declare variables for the two joysticks being used
 	OperatorConsole *m_operatorConsole;
 	
+#ifndef SHIT_MODE
 	DalekDrive *m_dalekDrive;
+#else
+	RobotDrive *m_robotDrive;
+#endif 
 	
 	Compressor *m_compressor;
 	
-	
 	Catapult *m_catapult;
 	
-	Solenoid *m_solenoids[SOLENOIDS::LEFT_PISTON_OUT];
+	Solenoid *m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP];
 	
 	Encoder *m_winchPos;
 	
+	Pickup *m_pickup;
+	
 	Joystick *m_rightStick, *m_leftStick;
 	GamePad *m_gamePad;
+	
+	Talon *m_winch;
 	
 	bool pullingBack;
 	
@@ -40,24 +47,29 @@ public:
 	Karen() {
 		printf("PracticeRobot Constructor Started\n");
 		
-		for(UINT8 i = 0; i < SOLENOIDS::LEFT_PISTON_OUT; i++)
+		for(UINT8 i = 0; i < SOLENOIDS::PICKUP_PISTONS_TOP; i++)
 			m_solenoids[i] = new Solenoid(i+1);
 		
 		// Set up the robot for two motor drive
+#ifndef SHIT_MODE
 		m_dalekDrive = new DalekDrive(DalekDrive::MECANUM_WHEELS, 
 				DalekDrive::Motor(CAN_PORTS::DRIVE_FRONT_LEFT, DalekDrive::LEFT_FRONT),
 				DalekDrive::Motor(CAN_PORTS::DRIVE_FRONT_RIGHT, DalekDrive::RIGHT_FRONT),
 				DalekDrive::Motor(CAN_PORTS::DRIVE_REAR_LEFT, DalekDrive::LEFT_REAR),
 				DalekDrive::Motor(CAN_PORTS::DRIVE_REAR_RIGHT, DalekDrive::RIGHT_REAR));
 		
+		(*m_dalekDrive)[DalekDrive::LEFT_FRONT].SetFlip(true);
+		(*m_dalekDrive)[DalekDrive::RIGHT_FRONT].SetFlip(false);
+		(*m_dalekDrive)[DalekDrive::LEFT_REAR].SetFlip(true);
+		(*m_dalekDrive)[DalekDrive::RIGHT_REAR].SetFlip(false);
+#else
+		m_robotDrive = new RobotDrive(new CANJaguar(CAN_PORTS::DRIVE_FRONT_LEFT), new CANJaguar(CAN_PORTS::DRIVE_REAR_LEFT), 
+				new CANJaguar(CAN_PORTS::DRIVE_FRONT_RIGHT), new CANJaguar(CAN_PORTS::DRIVE_REAR_RIGHT));
+#endif
 		m_rightStick = new Joystick(USB_PORTS::RIGHT_JOY);
 		m_leftStick = new Joystick(USB_PORTS::LEFT_JOY);
 		m_gamePad = new GamePad(USB_PORTS::GAMEPAD);
 		
-		(*m_dalekDrive)[DalekDrive::LEFT_FRONT].SetFlip(false);
-		(*m_dalekDrive)[DalekDrive::RIGHT_FRONT].SetFlip(false);
-		(*m_dalekDrive)[DalekDrive::LEFT_REAR].SetFlip(false);
-		(*m_dalekDrive)[DalekDrive::RIGHT_REAR].SetFlip(false);
 		
 		// Define joysticks on the Drivers Station
 		m_operatorConsole = new OperatorConsole(OperatorConsole::ARCADE_DRIVE, m_rightStick, m_leftStick, m_gamePad);
@@ -66,8 +78,13 @@ public:
 		
 		m_winchPos = new Encoder(DIO_PORTS::ENCODER_A, DIO_PORTS::ENCODER_B);
 		
-		m_catapult = new Catapult(new Talon(PWM_PORTS::WINCH_TALONS), m_winchPos, m_solenoids[SOLENOIDS::CLUTCH_ON-1], m_solenoids[SOLENOIDS::CLUTCH_OFF-1],
+		m_catapult = new Catapult(m_winch = new Talon(PWM_PORTS::WINCH_TALONS), m_winchPos, m_solenoids[SOLENOIDS::CLUTCH_ON-1], m_solenoids[SOLENOIDS::CLUTCH_OFF-1],
 				m_solenoids[SOLENOIDS::LATCH_OUT-1], m_solenoids[SOLENOIDS::LATCH_IN-1], new DigitalInput(DIO_PORTS::ENGAGED));
+		
+		m_pickup = new Pickup(new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
+				new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN]), 
+				new Talon(PWM_PORTS::ROLLER_TALONS), new DigitalInput(DIO_PORTS::LEFT_REED), new DigitalInput(DIO_PORTS::RIGHT_REED), 
+				Pickup::PICKUP_UP);
 		
 		// Initialize counters to record the number of loops completed in autonomous and teleop modes
 		m_autoPeriodicLoops = 0;
@@ -130,8 +147,10 @@ public:
 	
 	void TestPeriodic(void) {
 		printf("Engaged switch: %d", m_catapult->isAtStop());
-		for(UINT8 i = 0; i < SOLENOIDS::LEFT_PISTON_OUT; i++)
-			m_solenoids[i]->Set(m_rightStick->GetRawButton(i+1));
+		for(UINT8 i = 0; i < SOLENOIDS::PICKUP_PISTONS_TOP; i++)
+			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
+		
+		m_winch->Set(0.5*m_gamePad->GetAxis(GamePad::LEFT_Y));
 		
 		SmartDashboard::PutNumber("WinchPosition", double(m_winchPos->Get()));
 		printf("Winch Encoder: %d\n", int(m_winchPos->Get()));
@@ -143,13 +162,15 @@ public:
 		m_telePeriodicLoops++;
 		
 //		m_dalekDrive->printMotors();
-		/*if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
+#ifndef SHIT_MODE
+		printf("Calling m_dalekDrive->Drive(%f, %f, %f)", m_operatorConsole->GetX(), m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
+		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
 			m_dalekDrive->Drive(m_operatorConsole->GetX(), m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
 		else
 			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());
-		*/
-		m_dalekDrive->printMotors();
-		//m_dalekDrive->Drive(0.0, 0.0, 0.0);
+#else
+		m_robotDrive->MecanumDrive_Cartesian(m_operatorConsole->GetX(), m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
+#endif
 		if(!m_catapult->lockedAndloaded())
 		{
 			if(!pullingBack && m_operatorConsole->Engage())
@@ -167,8 +188,12 @@ public:
 			m_catapult->Fire();
 		}
 		
+		m_pickup->SetRoller(m_operatorConsole->GetRoller());
+		m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
 		
-		SmartDashboard::PutBoolean("LockedAndLoaded",m_catapult->lockedAndloaded());		
+		
+		SmartDashboard::PutBoolean("LockedAndLoaded",m_catapult->lockedAndloaded());
+		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());
 	} // TeleopPeriodic(void)
 	
 	
