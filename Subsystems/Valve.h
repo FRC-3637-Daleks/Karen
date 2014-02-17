@@ -1,5 +1,5 @@
 #ifndef __VALVE_H__
-#define __VALUE_H__
+#define __VALVE_H__
 #include "WPILib.h"
 
 class Solenoid;
