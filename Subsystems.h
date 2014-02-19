@@ -2,6 +2,7 @@
 #define _SUBSYSTEMS_H_
 
 #include "WPILib.h"
+#include "Subsystems/Maxbotix.h"
 #include "Subsystems/Pickup.h"
 #include "Subsystems/Catapult.h"
 #include "Subsystems/DalekDrive.h"

@@ -92,7 +92,7 @@ Catapult::prepareFire()
 	
 	if(!isAtStop() && !isLatched()) {
 		m_shift->Close();
-		m_winch->Set(0.4);
+		m_winch->Set(-0.4);
 	}
 	else if(!isLatched()) {
 		m_winch->Set(0.0);
@@ -102,7 +102,7 @@ Catapult::prepareFire()
 		if(cnt == 0)
 			cnt = m_step->Get();
 		printf("cnt: %d\ncurrent encoder: %d\nabsolute value of the difference of these: %d", cnt, m_step->Get(), abs(m_step->Get() - cnt));
-		m_winch->Set(-0.5);
+		m_winch->Set(0.5);
 		if(abs(m_step->Get() - cnt) > m_backOffAmt) {
 			printf("Just for kicks\n");
 			m_winch->Set(0.0);
