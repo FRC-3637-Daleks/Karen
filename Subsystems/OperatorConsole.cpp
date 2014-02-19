@@ -77,12 +77,16 @@ const int OperatorConsole::GetRollerPosition()
 	{
 		Shoulder2 = false;
 		Shoulder1 = false;
-		return ++rollerPos > Pickup::PICKUP_UP? rollerPos=0:rollerPos;
+		return ++rollerPos > Pickup::PICKUP_UP? rollerPos=Pickup::PICKUP_UP:rollerPos;
 	}
 	
 	return rollerPos; 
 }
 
+const int OperatorConsole::GetRollerDirection()
+{
+	return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER)? -1:(m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER)? 1:0) ;
+}
 
 
 OperatorConsole::~OperatorConsole()

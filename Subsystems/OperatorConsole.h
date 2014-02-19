@@ -50,6 +50,7 @@ public:
 	
 	const float GetRoller() const;		// returns roller velocity input
 	const int GetRollerPosition();// returns roller
+	const int GetRollerDirection();  // returns direction of roller using same controls as roller position, don't use both
 	
 public:
 	void SetSquared(const bool b) {squared = b;};
