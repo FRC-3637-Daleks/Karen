@@ -44,25 +44,26 @@ public:
 	Karen() {
 		printf("PracticeRobot Constructor Started\n");
 		
-		m_compressor = new Compressor(DIO_PORTS::PRESSURE_SWITCH, RELAY_PORTS::COMPRESSER_RELAY);
+		m_compressor = 	new Compressor(DIO_PORTS::PRESSURE_SWITCH, RELAY_PORTS::COMPRESSER_RELAY);
+		
 		for(UINT8 i = 0; i < SOLENOIDS::PICKUP_PISTONS_TOP; i++)
 			m_solenoids[i] = new Solenoid(i+1);
 		
-		m_rightStick = new Joystick(USB_PORTS::RIGHT_JOY);
-		m_leftStick = new Joystick(USB_PORTS::LEFT_JOY);
-		m_gamePad = new GamePad(USB_PORTS::GAMEPAD);
+		m_rightStick = 	new Joystick(USB_PORTS::RIGHT_JOY);
+		m_leftStick = 	new Joystick(USB_PORTS::LEFT_JOY);
+		m_gamePad = 	new GamePad(USB_PORTS::GAMEPAD);
 		
-		m_leftReed = new DigitalInput(DIO_PORTS::LEFT_REED);
-		m_rightReed = new DigitalInput(DIO_PORTS::RIGHT_REED);
+		m_leftReed = 	new DigitalInput(DIO_PORTS::LEFT_REED);
+		m_rightReed = 	new DigitalInput(DIO_PORTS::RIGHT_REED);
 		m_lightSensor = new DigitalInput(DIO_PORTS::LIGHT_SENSOR);
 		
-		m_winchPos = new Encoder(DIO_PORTS::ENCODER_A, DIO_PORTS::ENCODER_B);
-		m_winch = new Talon(PWM_PORTS::WINCH_TALONS);
+		m_winchPos = 	new Encoder(DIO_PORTS::ENCODER_A, DIO_PORTS::ENCODER_B);
+		m_winch = 		new Talon(PWM_PORTS::WINCH_TALONS);
 		
 //		m_ultraSonicSensor = new Maxbotix(ANALOG_PORTS::ULTRA_SONIC, 5.0, 20, Maxbotix::kCentimeters);
 		
 		// Set up the robot for two motor drive
-		m_dalekDrive = new DalekDrive(DalekDrive::MECANUM_WHEELS, CAN_PORTS::DRIVE_FRONT_LEFT, CAN_PORTS::DRIVE_FRONT_RIGHT, 
+		m_dalekDrive = 	new DalekDrive(DalekDrive::MECANUM_WHEELS, CAN_PORTS::DRIVE_FRONT_LEFT, CAN_PORTS::DRIVE_FRONT_RIGHT, 
 																  CAN_PORTS::DRIVE_REAR_LEFT,	CAN_PORTS::DRIVE_REAR_RIGHT);
 		(*m_dalekDrive)[DalekDrive::LEFT_FRONT].SetFlip(true);
 		(*m_dalekDrive)[DalekDrive::RIGHT_FRONT].SetFlip(false);
@@ -73,13 +74,13 @@ public:
 		m_operatorConsole = new OperatorConsole(OperatorConsole::ARCADE_DRIVE, m_leftStick, m_rightStick, m_gamePad);
 		
 		// Define catapult members
-		m_catapult = new Catapult(m_winch, m_winchPos, m_solenoids[SOLENOIDS::CLUTCH_ON-1], m_solenoids[SOLENOIDS::CLUTCH_OFF-1],
+		m_catapult = 	new Catapult(m_winch, m_winchPos, m_solenoids[SOLENOIDS::CLUTCH_ON-1], m_solenoids[SOLENOIDS::CLUTCH_OFF-1],
 				m_solenoids[SOLENOIDS::LATCH_OUT-1], m_solenoids[SOLENOIDS::LATCH_IN-1], new DigitalInput(DIO_PORTS::ENGAGED));
 		
 		// Define Pickup system members
-		m_pickup = new Pickup(new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
-				new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN]), 
-				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
+		m_pickup = 	new Pickup(new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
+								new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN]), 
+								new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
 		
 //		m_table = NetworkTable::GetTable("autondata");
 		// Initialize counters to record the number of loops completed in autonomous and teleop modes
@@ -178,12 +179,6 @@ public:
 	void TeleopPeriodic(void) {
 		// increment the number of teleop periodic loops completed
 		m_telePeriodicLoops++;
-//		printf("Pressure Switch: %d\n", m_compressor->GetPressureSwitchValue());
-//		m_dalekDrive->printMotors();
-//		printf("Calling m_dalekDrive->Drive(%f, %f, %f)", m_operatorConsole->GetX(), m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
-		
-		// DRIVE
-		m_dalekDrive->printMotors();
 		
 		m_operatorConsole->SetPrecision((m_leftStick->GetZ()+m_rightStick->GetZ())/2);
 		
@@ -191,8 +186,10 @@ public:
 			m_dalekDrive->Drive(m_operatorConsole->GetX(), -m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
 		else
 			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());	
-		
-//		printf("Drive Complete\n");
+
+#ifdef DEBUG_KAREN
+		printf("Drive Complete\n");
+#endif
 		
 		// CATAPULT
 		if(!m_catapult->lockedAndloaded())
@@ -211,8 +208,10 @@ public:
 			pullingBack = false;
 			m_catapult->Fire();
 		}
-		
-//		printf("Catapult Complete\n");
+
+#ifdef DEBUG_KAREN
+		printf("Catapult Complete\n");
+#endif
 		
 		// ROLLER SPEED
 		m_pickup->SetRoller(-m_operatorConsole->GetRoller());
@@ -226,19 +225,19 @@ public:
 		else
 			m_pickup->Stop();
 
-//		printf("Roller Complete\n");
+#ifdef DEBUG_KAREN
+		printf("Roller Complete\n");
+#endif
 		
-		//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
-		
-		printf("isLatched = %d\nisAtStop = %d\nlockedAndLoaded = %d\n", m_catapult->isLatched(), m_catapult->isAtStop(), m_catapult->lockedAndloaded());
-		
+		//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());		
 		
 		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());
-		SmartDashboard::PutBoolean("DigitalInput", m_catapult->isAtStop());
 		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());
 //		SmartDashboard::PutNumber("DistanceFromWall", m_ultraSonicSensor->GetRangeInInches());
 		
-		//printf("Teleop Periodic Looped\n");
+#ifdef DEBUG_KAREN
+		printf("Teleop Periodic Looped\n");
+#endif
 	} // TeleopPeriodic(void)
 	
 	

@@ -1,5 +1,6 @@
 #ifndef __CATAPULT_H__
 #define __CATAPULT_H__
+#include "Defines.h"
 #include "WPILib.h"
 #include "Valve.h"
 

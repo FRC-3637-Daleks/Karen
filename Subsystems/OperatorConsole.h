@@ -2,6 +2,7 @@
 #define _OPERATOR_CONSOLE_H_
 
 #include <cmath>
+#include "Defines.h"
 #include "Gamepad.h"
 #include "Pickup.h"
 #include "Catapult.h"

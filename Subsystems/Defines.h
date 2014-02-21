@@ -4,6 +4,10 @@
 #define MIN_GOAL_RANGE_INCHES 100 
 #define MAX_GOAL_RANGE_INCHES 102
 
+#define DEBUG_DRIVE
+#define DEBUG_PICKUP
+#define DEBUG_CATAPULT
+#define DEBUG_KAREN
 
 
 #endif /*_DEFINES_H_*/

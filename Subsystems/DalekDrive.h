@@ -2,6 +2,7 @@
 #define _DALEK_DRIVE_H_
 
 #include "WPILib.h"
+#include "Defines.h"
 
 // functions to be stored in array for quick reference
 float leftFrontAlg(float x, float y, float theta);

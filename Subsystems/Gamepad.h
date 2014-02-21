@@ -2,6 +2,7 @@
 #define _GAMEPAD_H_
 
 #include "Joystick.h"
+#include "Defines.h"
 
 class GamePad: public Joystick
 // front end for translating Joystick interface to make sense for the Logitech Gamepad

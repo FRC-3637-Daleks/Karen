@@ -1,6 +1,7 @@
 #ifndef _PICKUP_H_
 #define _PICKUP_H_
 
+#include "Defines.h"
 #include "WPILib.h"
 #include "Valve.h"
 
