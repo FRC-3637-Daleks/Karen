@@ -7,7 +7,6 @@
 #include "Hardware.h"
 #include "Subsystems.h"
 #include "NetworkTables/NetworkTable.h"
-#include "Defines.h"
 
 class Karen : public IterativeRobot
 {
@@ -20,6 +19,7 @@ class Karen : public IterativeRobot
 	
 	// Pointers to allocated resources
 	Solenoid *m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP];
+	Valve *m_stop, *m_direction;
 	Compressor *m_compressor;
 	Encoder *m_winchPos;
 	Joystick *m_rightStick, *m_leftStick;
@@ -78,8 +78,8 @@ public:
 				m_solenoids[SOLENOIDS::LATCH_OUT-1], m_solenoids[SOLENOIDS::LATCH_IN-1], new DigitalInput(DIO_PORTS::ENGAGED));
 		
 		// Define Pickup system members
-		m_pickup = 	new Pickup(new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
-								new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN]), 
+		m_pickup = 	new Pickup(m_direction = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
+								m_stop = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN], true), 
 								new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
 		
 //		m_table = NetworkTable::GetTable("autondata");
@@ -165,6 +165,22 @@ public:
 			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
 //			m_solenoids[i]->StopLiveWindowMode();
 		}
+		
+		if(m_gamePad->GetAxis(GamePad::PAD_Y) > 0.5)
+		{
+			m_direction->Open();
+			m_stop->Open();
+		}
+		else if(m_gamePad->GetAxis(GamePad::PAD_Y) < -0.5)
+		{
+			m_stop->Open();
+			m_direction->Close();
+		}
+		else
+		{
+			m_stop->Close();
+		}
+			
 		
 		m_winch->Set(0.5*m_gamePad->GetAxis(GamePad::LEFT_Y));
 		m_pickup->SetRoller(-m_gamePad->GetAxis(GamePad::RIGHT_Y));
