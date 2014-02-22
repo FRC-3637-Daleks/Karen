@@ -107,10 +107,14 @@ Catapult::prepareFire()
 	else if(!lockedAndloaded()){
 		if(cnt == 0)
 			cnt = m_step->Get();
+#ifdef DEBUG_CATAPULT
 		printf("cnt: %d\ncurrent encoder: %d\nabsolute value of the difference of these: %d", cnt, m_step->Get(), abs(m_step->Get() - cnt));
+#endif
 		m_winch->Set(0.5);
 		if(abs(m_step->Get() - cnt) > m_backOffAmt) {
+#ifdef DEBUG_CATAPULT
 			printf("Just for kicks\n");
+#endif
 			m_winch->Set(0.0);
 			m_shift->Open();
 			cnt = 0;
