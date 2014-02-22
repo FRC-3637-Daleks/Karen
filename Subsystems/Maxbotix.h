@@ -1,7 +1,6 @@
 #ifndef MAXBOTIX_H_
 #define MAXBOTIX_H_
 
-#include "Defines.h"
 #include "SensorBase.h"
 #include "PIDSource.h"
 

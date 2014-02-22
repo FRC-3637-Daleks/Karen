@@ -35,7 +35,17 @@ Maxbotix::Maxbotix(UINT32 sensorChannel, float maxVoltage,
 		float minDistance, DistanceUnit units)
 {
 	// default to module 1
-	Maxbotix(1, sensorChannel, maxVoltage, minDistance, units);
+	AnalogModule *module;
+
+	m_channel = new AnalogChannel(1, sensorChannel);
+	module = m_channel->GetModule();
+	module->SetSampleRate(m_sampleRate);
+	m_channel->SetAverageBits(m_averageBits);
+	m_voltsPerCM = maxVoltage / 1024.0;
+	m_minDistance = minDistance;
+	m_minVoltage = minDistance * m_voltsPerCM;
+	m_maxVolts = maxVoltage;
+	m_units = units;
 }
 
 Maxbotix::Maxbotix(UINT8 sensorModule, UINT32 sensorChannel, float maxVoltage, 
