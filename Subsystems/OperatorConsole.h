@@ -25,19 +25,20 @@ private:
 	float precisionFactor;
 	bool engaged;
 	int rollerPos;
+	bool manual;
 	
 public:
 	OperatorConsole(const Drive_t driveConfig, Joystick *left, Joystick *right, GamePad *pad): 
 		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), 
-		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP), manual(false) {};
 	
 	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad):
 		drive(driveConfig), m_leftStick(&left), m_rightStick(&right), m_gamePad(&pad), allocated(false), 
-		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP), manual(false) {};
 	
 	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad):
 		drive(driveConfig), m_leftStick(new Joystick(left)), m_rightStick(new Joystick(right)), m_gamePad(new GamePad(pad)), allocated(true),
-		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP) {};
+		squared(true), precisionFactor(1.0), engaged(false), rollerPos(Pickup::PICKUP_UP), manual(false) {};
 	
 public:
 	const float GetX() const;
@@ -50,7 +51,7 @@ public:
 	const bool Engage() const;		// returns true if the winching precondition are true
 	
 	const float GetRoller() const;		// returns roller velocity input
-	const int GetRollerPosition();// returns roller
+	const int GetRollerPosition();	// returns roller
 	const int GetRollerDirection();  // returns direction of roller using same controls as roller position, don't use both
 	
 public:
@@ -62,6 +63,8 @@ public:
 	
 	void SetDrive(const Drive_t d) {drive = d;};
 	const int GetDrive() const  {return drive;};
+	
+	const bool GetOverride();
 	
 private:
 	static const float deadzone(const float f) {return fabs(f) < DEADZONE? 0.0:f;};

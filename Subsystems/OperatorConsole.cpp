@@ -88,6 +88,23 @@ const int OperatorConsole::GetRollerDirection()
 	return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER)? -1:(m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER)? 1:0) ;
 }
 
+const bool OperatorConsole::GetOverride()
+{
+	static bool pressed = false;
+	if(m_gamePad->GetButton(GamePad::START) && !pressed)
+	{
+		pressed = true;
+		manual = !manual;
+	}
+	else if(!m_gamePad->GetButton(GamePad::START))
+	{
+		pressed = false;
+	}
+	
+	return manual;
+}
+
+
 
 OperatorConsole::~OperatorConsole()
 {
