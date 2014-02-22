@@ -67,13 +67,19 @@ Catapult::isAtStop()
 bool
 Catapult::lockedAndloaded()
 {
-	if(//isAtStop() &&
+	static int wasAtStopAndLatched = 0;
+	if(isLatched() && isAtStop())
+		wasAtStopAndLatched++;
+	if((isAtStop() || wasAtStopAndLatched > STOPPED_AND_LATCHED_ITERATIONS) &&  
+			// requires it be at stop and latched for a certain amount of time
 	   isLatched() &&
 	   m_shift->isOpen())
 	{
 		m_winch->Set(0.0);
 		return true;
 	}
+	
+	wasAtStopAndLatched = 0;
 	return false;
 }
 
