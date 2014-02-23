@@ -135,12 +135,12 @@ public:
 		
 		m_dalekDrive->Drive(0.0, vel, 0.0);
 		
-		if((isHot || autonTime.Get() > 8.0)&& range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES)
+		if((isHot || autonTime.Get() > 8.0) && range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES)
 			m_catapult->Fire();
 		else
 		{
 			m_catapult->prepareFire();
-			m_pickup->Down();
+			m_pickup->SetPos(Pickup::PICKUP_DOWN);
 		}
 		
 		m_pickup->SetRoller(-1.0);
@@ -187,7 +187,7 @@ public:
 	}
 
 	void TeleopPeriodic(void) {
-		// increment the number of teleop periodic loops completed
+		// increment the number of teleop periodic loops completedgit
 
 		m_operatorConsole->SetPrecision((m_leftStick->GetZ()));
 		m_operatorConsole->SetSquared(m_leftStick->GetZ() > 0.5);		
@@ -232,9 +232,9 @@ public:
 			// ROLLER POSITION
 			printf("Roller Direction: %d\n", m_operatorConsole->GetRollerDirection());
 			if(m_operatorConsole->GetRollerDirection() > 0)
-				m_pickup->Up();
+				m_pickup->SetPos(Pickup::PICKUP_UP);
 			else if(m_operatorConsole->GetRollerDirection() < 0)
-				m_pickup->Down();
+				m_pickup->SetPos(Pickup::PICKUP_DOWN);
 			else
 				m_pickup->Stop();
 
@@ -247,10 +247,9 @@ public:
 			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 			ManualPeriodic();
 		}
-			//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());		
-
-			SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());
-			SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());
+			//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
+		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());
+		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());
 			//		SmartDashboard::PutNumber("DistanceFromWall", m_ultraSonicSensor->GetRangeInInches());
 
 #ifdef DEBUG_KAREN

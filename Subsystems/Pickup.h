@@ -36,9 +36,11 @@ public:
 		m_direction(new Valve(top, bottom)), m_stop(new Valve(stop_a, stop_b)), m_roller(new Talon(roller)), 
 		m_middleLeft(new DigitalInput(midLeft)), m_middleRight(new DigitalInput(midRight)), allocated(true), targetPos(start), location(start) {};
 	
-public:
+private:
 	void Up();
 	void Down();
+	
+public:
 	void Stop();
 	
 	const bool SetPos(const int pos); // returns true if it's at the spot
