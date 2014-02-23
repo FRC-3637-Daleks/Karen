@@ -15,7 +15,7 @@ class Karen : public IterativeRobot
 	DalekDrive *m_dalekDrive;
 	Catapult *m_catapult;
 	Pickup /*truck*/ *m_pickup;
-	//	Maxbotix *m_ultraSonicSensor;
+	Maxbotix *m_ultraSonicSensor;
 
 	// Pointers to allocated resources
 	Solenoid *m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP];
@@ -32,13 +32,9 @@ class Karen : public IterativeRobot
 
 	// Miscellaneous variables
 	bool pullingBack;
-	int distance;
+	double range;
 	bool isHot;
-
-	// Local variables to count the number of periodic loops performed
-	UINT32 m_autoPeriodicLoops;
-	UINT32 m_disabledPeriodicLoops;
-	UINT32 m_telePeriodicLoops;
+	Timer autonTime;
 public:
 
 	Karen() {
@@ -60,7 +56,7 @@ public:
 		m_winchPos = 	new Encoder(DIO_PORTS::ENCODER_A, DIO_PORTS::ENCODER_B);
 		m_winch = 		new Talon(PWM_PORTS::WINCH_TALONS);
 
-		//		m_ultraSonicSensor = new Maxbotix(ANALOG_PORTS::ULTRA_SONIC, 5.0, 20, Maxbotix::kCentimeters);
+		m_ultraSonicSensor = new Maxbotix(ANALOG_PORTS::ULTRA_SONIC, 5.0, 20, Maxbotix::kCentimeters);
 
 		// Set up the robot for two motor drive
 		m_dalekDrive = 	new DalekDrive(DalekDrive::MECANUM_WHEELS, CAN_PORTS::DRIVE_FRONT_LEFT, CAN_PORTS::DRIVE_FRONT_RIGHT, 
@@ -82,12 +78,8 @@ public:
 				m_stop = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN], true), 
 				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
 
-		//		m_table = NetworkTable::GetTable("autondata");
-		// Initialize counters to record the number of loops completed in autonomous and teleop modes
-		m_autoPeriodicLoops = 0;
-		m_disabledPeriodicLoops = 0;
-		m_telePeriodicLoops = 0;	
-
+		m_table = NetworkTable::GetTable("autondata");
+		
 		printf("Karen Constructor Completed\n");
 	}
 
@@ -95,60 +87,63 @@ public:
 
 	void RobotInit(void) {
 		printf("Built: %s %s\n", __DATE__, __TIME__);
-		//		m_catapult->prepareFire();
 		SmartDashboard::init();
 		printf("RobotInit() completed.\n");
 	}
 
 	void DisabledInit(void) {
-		m_disabledPeriodicLoops = 0;			// Reset the loop counter for disabled mode
 	}
 
 	void AutonomousInit(void) {
-		m_autoPeriodicLoops = 0;				// Reset the loop counter for autonomous mode
+		autonTime.Reset();
+		autonTime.Start();
 	}
 
 	void TeleopInit(void) {
-
+		
+#ifdef DEBUG_DRIVE
 		for(UINT8 i = 0; i < DalekDrive::N_MOTORS; i++)
 			printf("motorFunction[%d] = %p\n", i, DalekDrive::Motor::mecFuncs[i]);
+#endif
 
 		pullingBack = false;
 		m_compressor->Start();
-		m_telePeriodicLoops = 0;				// Reset the loop counter for teleop mode
 	}
 
 	/********************************** Periodic Routines *************************************/
 
 	void DisabledPeriodic(void)  {
-		// increment the number of disabled periodic loops completed
-		m_disabledPeriodicLoops++;
-		//		distance = m_table->GetNumber("distance");
-		// while disabled, print disabled
-		//printf("Disabled: %d\r\n", m_disabledPeriodicLoops);
+		range = m_table->GetNumber("range");
 	}
 
 	void AutonomousPeriodic(void) {
-		m_autoPeriodicLoops++;
-		//		SmartDashboard::PutNumber("DistanceFromWall", m_ultraSonicSensor->GetRangeInInches());
-		//		isHot = m_table->GetBoolean("ishot");
-		//		distance = m_table->GetNumber("distance");
-		/*		if(distance < MIN_GOAL_RANGE_INCHES)
+		getNetData();
+		static float vel = 0.0;
+		if(range < MIN_GOAL_RANGE_INCHES)
 		{
-			m_dalekDrive->Drive(0.5, 0.5);
+			vel = vel > 0.75? 0.75:vel+0.05;
 		}
-		else if(distance > MAX_GOAL_RANGE_INCHES)
+		else if(range > MAX_GOAL_RANGE_INCHES)
 		{
-			m_dalekDrive->Drive(-0.5, -0.5);
+			vel = vel < -0.75? -0.75:vel-0.05;
 		}
-		if(isHot && distance < MAX_GOAL_RANGE_INCHES && distance > MIN_GOAL_RANGE_INCHES)
+		else
+		{
+			vel -= fabs(vel)/vel*0.05;
+			m_dalekDrive->Drive(0.0, 0.0, 0.0);
+		}
+		
+		m_dalekDrive->Drive(0.0, vel, 0.0);
+		
+		if((isHot || autonTime.Get() > 8.0)&& range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES)
 			m_catapult->Fire();
 		else
 		{
 			m_catapult->prepareFire();
 			m_pickup->Down();
 		}
-		 */
+		
+		m_pickup->SetRoller(-1.0);
 	}
 
 	void TestInit(void)
@@ -193,7 +188,6 @@ public:
 
 	void TeleopPeriodic(void) {
 		// increment the number of teleop periodic loops completed
-		m_telePeriodicLoops++;
 
 		m_operatorConsole->SetPrecision((m_leftStick->GetZ()));
 		m_operatorConsole->SetSquared(m_leftStick->GetZ() > 0.5);		
@@ -264,6 +258,12 @@ public:
 #endif
 		} // TeleopPeriodic(void)
 
+private:
+	void getNetData()
+	{
+		isHot = m_table->GetBoolean("ishot");
+		range = m_table->GetNumber("range");
+	}
 
 	};
 
