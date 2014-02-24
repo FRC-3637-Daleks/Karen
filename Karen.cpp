@@ -35,6 +35,7 @@ class Karen : public IterativeRobot
 	double range;
 	bool isHot;
 	Timer autonTime;
+	Timer testWait;
 public:
 
 	Karen() {
@@ -150,12 +151,133 @@ public:
 	{
 		printf("Beginning Test Init\n");
 		m_compressor->Start();
-
+		testWait.Start();
 	}
 
 	void TestPeriodic(void) {
-		ManualPeriodic();
-
+		static int stage = 0;
+		static bool waiting = true;
+		if(stage >= 8)
+			return;
+		
+		if(testWait.Get() > 1.0)
+		{
+			switch(stage)
+			{
+			case 0:
+				{
+					static float rollerVel = 0.0;
+					if(waiting)
+						printf("Rollers ramping up\n");
+					m_pickup->SetRoller(rollerVel += 0.05 > 1.0? 1.0:rollerVel);
+					if(rollerVel == 1.0)
+						printf("Rollers at 100%%\n");
+					if(testWait.Get() > 5.0)
+					{
+						printf("Stopping\n");
+						m_pickup->SetRoller(0.0);
+						testWait.Reset();
+					}
+					break;
+				}
+			case 1:
+				{
+					static float rollerBackVel = 0.0;
+					if(waiting)
+						printf("Rollers ramping backwards\n");
+					m_pickup->SetRoller(rollerBackVel -= 0.05 < -1.0? -1.0:rollerBackVel);
+					if(rollerBackVel == -1.0)
+						printf("Rollers at -100%%\n");
+					if(testWait.Get() > 5.0)
+					{
+						printf("Stopping\n");
+						m_pickup->SetRoller(0.0);
+						testWait.Reset();
+					}
+					break;
+				}
+			case 2:
+				{
+					if(waiting)
+						printf("Moving arms up in 1 second, clear!\n");
+					if(testWait.Get() > 2.0)
+					{
+						m_pickup->SetPos(Pickup::PICKUP_UP);
+					}
+					if(testWait.Get() > 5.0)
+					{
+						printf("Up\n");
+						testWait.Reset();
+					}
+					break;
+				}
+			case 3:
+				{
+					if(waiting)
+						printf("Moving arms to center in 1 second, clear!\n");
+					if(testWait.Get() > 2.0)
+					{
+						m_pickup->SetPos(Pickup::PICKUP_MIDDLE);
+					}
+					if(testWait.Get() > 5.0)
+					{
+						printf("Stopped at Middle\n");
+						testWait.Reset();
+					}
+					break;
+				}
+			case 4:
+				{
+					if(waiting)
+						printf("Moving arms down in 1 second, clear!\n");
+					if(testWait.Get() > 2.0)
+					{
+						m_pickup->SetPos(Pickup::PICKUP_DOWN);
+					}
+					if(testWait.Get() > 5.0)
+					{
+						printf("Down\n");
+						testWait.Reset();
+					}
+					break;
+				}
+			case 5:
+				{
+					if(waiting)
+						printf("Cocking capapult\n");
+					m_catapult->prepareFire();
+					if(testWait.Get() > 5.0)
+					{
+						printf("Cocked\n");
+						testWait.Reset();
+					}
+					break;
+				}
+			case 6:
+				{
+					if(waiting)
+						printf("Gently releasing, maybe\n");
+					m_solenoids[SOLENOIDS::CLUTCH_ON-1]->Set(true);
+					m_winch->Set(-0.1);
+					break;
+				}
+			case 7:
+				{
+					printf("Okai bi\n");
+					stage++;
+				}
+			}
+			waiting = false;
+		}
+		else
+		{
+			if(!waiting)
+				stage++;
+			waiting = true;			
+		}
+		
+		
+		/*ManualPeriodic();
 		if(m_gamePad->GetAxis(GamePad::PAD_Y) > 0.5)
 		{
 			m_direction->Open();
@@ -174,6 +296,7 @@ public:
 		m_winch->Set(0.5*m_gamePad->GetAxis(GamePad::LEFT_Y));
 		m_pickup->SetRoller(-m_gamePad->GetAxis(GamePad::RIGHT_Y));
 		printf("Left reed switch: %d; Right reed switch: %d; Light Sensor: %d", (int)m_leftReed->Get(), (int)m_rightReed->Get(), (int)m_lightSensor->Get());
+		*/
 	}
 
 	void ManualPeriodic(void)
