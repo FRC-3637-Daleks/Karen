@@ -7,7 +7,7 @@ const float OperatorConsole::GetX() const
 				((m_rightStick->GetX() < 0? -1:1)*pow(deadzone(m_rightStick->GetX()), squared? 2:1) + 
 				(m_leftStick->GetX() < 0? -1:1)*pow(deadzone(m_leftStick->GetX()), squared? 2:1))/2;
 	else
-		return (m_rightStick->GetX() < 0? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetX()), squared? 2:1));
+		return (m_rightStick->GetX() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetX()), squared? 2:1));
 }
 
 const float OperatorConsole::GetY() const
@@ -17,7 +17,7 @@ const float OperatorConsole::GetY() const
 				((m_rightStick->GetY() < 0? -1:1) * pow(deadzone(m_rightStick->GetY()), squared? 2:1) + 
 				(m_leftStick->GetY() < 0? -1:1) * pow(deadzone(m_leftStick->GetY()), squared? 2:1))/2;
 	else
-		return (m_rightStick->GetY() < 0? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetY()), squared? 2:1));
+		return (m_rightStick->GetY() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetY()), squared? 2:1));
 }
 
 const float OperatorConsole::GetTheta() const
@@ -27,17 +27,17 @@ const float OperatorConsole::GetTheta() const
 				((m_rightStick->GetY() < 0? -1:1) * pow(deadzone(m_rightStick->GetY()), squared? 2:1) -
 				(m_leftStick->GetY() < 0? -1:1) * pow(deadzone(m_leftStick->GetY()), squared? 2:1))/2;
 	else
-		return (m_leftStick->GetX() < 0? -1:1) * precisionFactor * (pow(deadzone(m_leftStick->GetX()), squared? 2:1));
+		return (m_leftStick->GetX() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_leftStick->GetX()), squared? 2:1));
 }
 
 const float OperatorConsole::GetRight() const
 {
-	return  (m_rightStick->GetY() < 0? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetY()), squared? 2:1));
+	return  (m_rightStick->GetY() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_rightStick->GetY()), squared? 2:1));
 }
 
 const float OperatorConsole::GetLeft() const
 {
-	return (m_leftStick->GetY() < 0? -1:1) * precisionFactor * (pow(deadzone(m_leftStick->GetY()), squared? 2:1));
+	return (m_leftStick->GetY() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_leftStick->GetY()), squared? 2:1));
 }
 
 const bool OperatorConsole::Disengage() const
@@ -95,6 +95,7 @@ const bool OperatorConsole::GetOverride()
 	{
 		pressed = true;
 		manual = !manual;
+		printf("Manual Override: %d", manual);
 	}
 	else if(!m_gamePad->GetButton(GamePad::START))
 	{

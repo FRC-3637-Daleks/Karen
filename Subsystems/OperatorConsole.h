@@ -65,6 +65,7 @@ public:
 	const int GetDrive() const  {return drive;};
 	
 	const bool GetOverride();
+	const bool GetTestContinue() const {return m_gamePad->GetButton(GamePad::B3);};
 	
 private:
 	static const float deadzone(const float f) {return fabs(f) < DEADZONE? 0.0:f;};
