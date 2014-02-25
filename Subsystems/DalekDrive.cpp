@@ -93,6 +93,8 @@ void DalekDrive::Drive(const float x, const float y, const float theta)
 		for(UINT8 i = 0; i < N_MOTORS; motors[i++].SetMecSpeed(x, y, theta))
 #ifdef DEBUG_DRIVE
 			printf("Setting motor[%d]\n", i);
+#else
+		;
 #endif
 	}
 	else
