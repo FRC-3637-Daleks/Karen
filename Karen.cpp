@@ -258,7 +258,12 @@ public:
 					if(waiting)
 						printf("Gently releasing, maybe\n");
 					m_solenoids[SOLENOIDS::CLUTCH_ON-1]->Set(true);
-					m_winch->Set(-0.1);
+					if(testWait.Get() > 2.0)
+					{
+						m_solenoids[SOLENOIDS::LATCH_IN-1]->Set(true);
+						m_solenoids[SOLENOIDS::LATCH_OUT-1]->Set(false);
+						m_winch->Set(-0.1);
+					}
 					break;
 				}
 			case 7:
@@ -273,6 +278,8 @@ public:
 		{
 			if(!waiting)
 				stage++;
+			if(!m_operatorConsole->GetTestContinue())
+				testWait.Reset();
 			waiting = true;			
 		}
 		
@@ -305,7 +312,8 @@ public:
 		{
 			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
 		}
-
+		
+		printf("Left reed switch: %d; Right reed switch: %d; Light Sensor: %d", (int)m_leftReed->Get(), (int)m_rightReed->Get(), (int)m_lightSensor->Get());
 		m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));	
 	}
 
@@ -313,25 +321,29 @@ public:
 		// increment the number of teleop periodic loops completedgit
 
 		m_operatorConsole->SetPrecision((m_leftStick->GetZ()));
-		m_operatorConsole->SetSquared(m_leftStick->GetZ() > 0.5);		
+		m_operatorConsole->SetSquared(m_rightStick->GetZ() > 0.5);		
 
 		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
 			m_dalekDrive->Drive(m_operatorConsole->GetX(), -m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
 		else
 			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());	
-
+		
 #ifdef DEBUG_KAREN
 		printf("Drive Complete\n");
 #endif
 
 		if(!m_operatorConsole->GetOverride())
 		{
+#ifdef DEBUG_KAREN
+			printf("Override Mode\n");
+#endif
 
 			// CATAPULT
 			if(!m_catapult->lockedAndloaded())
 			{
 				if(!pullingBack && m_operatorConsole->Engage())
 				{
+					
 					pullingBack = true;
 				}
 				else if(pullingBack)
@@ -387,6 +399,6 @@ private:
 		range = m_table->GetNumber("range");
 	}
 
-	};
+};
 
 	START_ROBOT_CLASS(Karen);
