@@ -32,7 +32,8 @@ void Pickup::Stop()
 	m_top->Set(true);
 	m_bottom->Set(true);
 	*/
-	m_stop->Close();
+	if(m_stop->isOpen())
+		m_stop->Close();
 	
 }
 
@@ -47,7 +48,7 @@ const bool Pickup::SetPos(const int pos)
 	{
 	case PICKUP_DOWN:
 		Down();
-		if(m_middleLeft->Get() || m_middleRight->Get())
+		if(!m_middleLeft->Get() || !m_middleRight->Get())
 		{
 			location = PICKUP_MIDDLE;
 		}
@@ -62,7 +63,7 @@ const bool Pickup::SetPos(const int pos)
 		break;
 	case PICKUP_UP:
 		Up();
-		if(m_middleLeft->Get() || m_middleRight->Get())
+		if(!m_middleLeft->Get() || !m_middleRight->Get())
 		{
 			location = PICKUP_MIDDLE;
 		}
@@ -76,7 +77,7 @@ const bool Pickup::SetPos(const int pos)
 		}
 		break;
 	case PICKUP_MIDDLE:
-		if(m_middleLeft->Get() || m_middleRight->Get())
+		if(!m_middleLeft->Get() || !m_middleRight->Get())
 		{
 			location = PICKUP_MIDDLE;
 			Stop();
