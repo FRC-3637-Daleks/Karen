@@ -98,7 +98,7 @@ Catapult::prepareFire()
 	
 	if(!isAtStop() && !isLatched()) {
 		m_shift->Close();
-		m_winch->Set(-0.4);
+		m_winch->Set(-0.7);
 	}
 	else if(!isLatched()) {
 		m_winch->Set(0.0);
