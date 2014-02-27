@@ -1,16 +1,16 @@
 #include "Pickup.h"
 
-Pickup::Pickup(Valve * const direction, Valve * const stop, Talon * const roller, 
+Pickup::Pickup(Valve * const direction, Solenoid * const stop, Solenoid * const move, Talon * const roller, 
 			DigitalInput *midLeft, DigitalInput *midRight, const int start): 
-		m_direction(direction), m_stop(stop), m_roller(roller), 
+		m_direction(direction), m_stop(stop), m_move(move), m_roller(roller), 
 		m_middleLeft(midLeft), m_middleRight(midRight), allocated(false), targetPos(start), location(start) 
 {
 	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds);
 	m_reedWatch->Start((uint32_t)this);
 }
 
-Pickup::Pickup(Valve& direction, Valve& stop, Talon& roller, DigitalInput& midLeft, DigitalInput& midRight, const int start):
-		m_direction(&direction), m_stop(&stop), m_roller(&roller), 
+Pickup::Pickup(Valve& direction, Solenoid& stop, Solenoid& move, Talon& roller, DigitalInput& midLeft, DigitalInput& midRight, const int start):
+		m_direction(&direction), m_stop(&stop), m_move(&move), m_roller(&roller), 
 		m_middleLeft(&midLeft), m_middleRight(&midRight), allocated(false), targetPos(start), location(start)
 {
 	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds);
@@ -19,7 +19,7 @@ Pickup::Pickup(Valve& direction, Valve& stop, Talon& roller, DigitalInput& midLe
 
 Pickup::Pickup(const UINT8 top, const UINT8 bottom, const UINT8 stop_a, const UINT8 stop_b, const UINT8 roller,
 			const UINT8 midLeft, const UINT8 midRight, const int start):
-		m_direction(new Valve(top, bottom)), m_stop(new Valve(stop_a, stop_b)), m_roller(new Talon(roller)), 
+		m_direction(new Valve(top, bottom)), m_stop(new Solenoid(stop_a)), m_move(new Solenoid(stop_b)), m_roller(new Talon(roller)), 
 		m_middleLeft(new DigitalInput(midLeft)), m_middleRight(new DigitalInput(midRight)), allocated(true), 
 		targetPos(start), location(start)
 {
@@ -36,8 +36,9 @@ void Pickup::Up()
 	m_top->Set(false);
 	m_bottom->Set(true);
 	*/
-	m_stop->Open();
-	m_direction->Open();
+	m_stop->Set(false);
+	m_move->Set(true);
+	m_direction->Close();
 }
 
 void Pickup::Down()
@@ -48,8 +49,9 @@ void Pickup::Down()
 	m_top->Set(true);
 	m_bottom->Set(false);
 	*/
-	m_stop->Open();
-	m_direction->Close();
+	m_stop->Set(false);
+	m_move->Set(true);
+	m_direction->Open();
 }
 
 void Pickup::Stop()
@@ -60,8 +62,9 @@ void Pickup::Stop()
 	m_top->Set(true);
 	m_bottom->Set(true);
 	*/
-	if(m_stop->isOpen())
-		m_stop->Close();
+	//if(m_stop->isOpen())
+	m_stop->Set(true);
+	m_move->Set(false);
 	
 }
 
@@ -136,6 +139,7 @@ void Pickup::CheckArms()
 		if(!m_middleLeft->Get() || !m_middleRight->Get())
 		{
 			location = PICKUP_MIDDLE;
+			Stop();
 		}
 		break;
 	}
@@ -165,7 +169,8 @@ Pickup::~Pickup()
 	
 	if(m_stop)
 		delete m_stop;
-	
+	if(m_move)
+		delete m_move;
 	if(m_direction)
 		delete m_direction;
 }

@@ -13,7 +13,9 @@ public:
 	
 private:
 	Valve *m_direction;
-	Valve *m_stop;
+	//Valve *m_stop;
+	Solenoid *m_stop;
+	Solenoid *m_move;
 	Talon *m_roller;
 	DigitalInput *m_middleLeft;
 	DigitalInput *m_middleRight;
@@ -24,10 +26,10 @@ private:
 	int location;
 	
 public:
-	Pickup(Valve * const direction, Valve * const stop, Talon * const roller, 
+	Pickup(Valve * const direction, Solenoid* const stop, Solenoid * const move, Talon * const roller, 
 			DigitalInput *midLeft, DigitalInput *midRight, const int start);
 	
-	Pickup(Valve& direction, Valve& stop, Talon& roller, 
+	Pickup(Valve& direction, Solenoid &stop, Solenoid &move, Talon& roller, 
 			DigitalInput& midLeft, DigitalInput& midRight, const int start);
 	
 	Pickup(const UINT8 top, const UINT8 bottom, const UINT8 stop_a, const UINT8 stop_b, const UINT8 roller,
