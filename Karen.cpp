@@ -76,7 +76,7 @@ public:
 
 		// Define Pickup system members
 		m_pickup = 	new Pickup(m_direction = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
-				m_stop = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN], true), 
+				m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], 
 				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
 
 		m_table = NetworkTable::GetTable("autondata");
@@ -365,28 +365,29 @@ public:
 			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 
 			// ROLLER POSITION
-			printf("Roller Direction: %d\n", m_operatorConsole->GetRollerDirection());
+			//printf("Roller Direction: %d\n", m_operatorConsole->GetRollerDirection());
 			if(m_operatorConsole->GetRollerDirection() > 0)
 				m_pickup->SetPos(Pickup::PICKUP_UP);
 			else if(m_operatorConsole->GetRollerDirection() < 0)
 				m_pickup->SetPos(Pickup::PICKUP_DOWN);
 			else
+			{
 				m_pickup->Stop();
+			}
 
 #ifdef DEBUG_KAREN
 			printf("Roller Complete\n");
 #endif
-		}
+		} 
 		else
 		{
 			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 			ManualPeriodic();
 		}
 			//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
-		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());
-		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());
 			//		SmartDashboard::PutNumber("DistanceFromWall", m_ultraSonicSensor->GetRangeInInches());
 
+		UpdateDash();
 #ifdef DEBUG_KAREN
 			printf("Teleop Periodic Looped\n");
 #endif
@@ -395,8 +396,41 @@ public:
 private:
 	void getNetData()
 	{
-		isHot = m_table->GetBoolean("ishot");
-		range = m_table->GetNumber("range");
+		if(m_table)
+		{
+			isHot = m_table->GetBoolean("ishot");
+			range = m_table->GetNumber("range");
+		}
+	}
+	
+	void UpdateDash()
+	{
+		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());  // Make Indicator Light
+		
+		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());  // Make Progress Bar
+		switch(m_pickup->GetLocation()) 
+		{
+		case Pickup::PICKUP_DOWN:
+			SmartDashboard::PutString("PickupAt", "DOWN");
+			break;
+		case Pickup::PICKUP_MIDDLE:
+			SmartDashboard::PutString("PickupAt", "VERTICAL");
+			break;
+		case Pickup::PICKUP_UP:
+			SmartDashboard::PutString("PickupAt", "UP");
+			break;
+		default:
+			SmartDashboard::PutString("PickupAt", "???");
+			break;
+		}
+		
+		SmartDashboard::PutBoolean("Hot", isHot);  // Make Indicator Light
+		SmartDashboard::PutNumber("Range", range); // Make at least hard print, at best progress bar with print
+		
+		
+		SmartDashboard::PutBoolean("Precision", m_operatorConsole->GetPrecision());  // Make Indicator Light
+		SmartDashboard::PutBoolean("InRange", range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES);  // Prints if it's in right range
+		
 	}
 
 };
