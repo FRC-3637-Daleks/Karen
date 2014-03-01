@@ -126,9 +126,15 @@ public:
 		catch(exception e)
 		{
 		}
+		
+		if(!SmartDashboard::GetBoolean("Auton"))
+			return;
+		
 	}
 
 	void AutonomousPeriodic(void) {
+		if(!SmartDashboard::GetBoolean("Auton"))
+			return;
 		getNetData();
 		static float vel = 0.0;
 		if(range < MIN_GOAL_RANGE_INCHES)
