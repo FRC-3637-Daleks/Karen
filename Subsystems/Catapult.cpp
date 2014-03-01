@@ -61,7 +61,7 @@ Catapult::isLatched()
 bool
 Catapult::isAtStop()
 {
-	return (m_stop->Get() == 1);
+	return (m_stop->Get() == 0);
 }
 
 bool
@@ -125,3 +125,23 @@ Catapult::prepareFire()
 		m_winch->Set(0.0);
 	}*/
 }
+
+void
+Catapult::unprepareFire()
+{
+	if(lockedAndloaded())
+	{
+		m_shift->Close();
+		m_latch->Open();
+	}
+	else if(abs(m_step->Get()) > 10)
+	{
+		m_winch->Set(0.3);
+	}
+	else
+	{
+		m_winch->Set(0.0);
+	}
+}
+
+

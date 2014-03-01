@@ -31,6 +31,7 @@ public:
 	bool lockedAndloaded();
 	void Fire();
 	void prepareFire();
+	void unprepareFire();
 	
 	
 private:
