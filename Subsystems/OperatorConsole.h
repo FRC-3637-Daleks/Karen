@@ -49,6 +49,7 @@ public:
 	
 	const bool Disengage() const;	// returns true if the firing button conditions are true
 	const bool Engage() const;		// returns true if the winching precondition are true
+	const bool Safe() const;		// returns true if the unload condition is true
 	
 	const float GetRoller() const;		// returns roller velocity input
 	const int GetRollerPosition();	// returns roller

@@ -51,6 +51,11 @@ const bool OperatorConsole::Engage() const
 	return (m_gamePad->GetButton(GamePad::B1));
 }
 
+const bool OperatorConsole::Safe() const
+{
+	return (m_gamePad->GetButton(GamePad::B2));
+}
+
 const float OperatorConsole::GetRoller() const
 {
 	return m_gamePad->GetAxis(GamePad::PAD_Y);
