@@ -6,13 +6,14 @@ const float OperatorConsole::GetX() const
 		return precisionFactor * 
 				((m_rightStick->GetX() < 0? -1:1)*pow(deadzone(m_rightStick->GetX()), squared? 2:1) + 
 				(m_leftStick->GetX() < 0? -1:1)*pow(deadzone(m_leftStick->GetX()), squared? 2:1))/2;
-	else
+	else {
 		float x = deadzone(m_rightStick->GetX());
 		if (squared) {
 			x *= fabs(x);
 		}
 		x *= precisionFactor;
 		return x;
+	}
 }
 
 const float OperatorConsole::GetY() const
@@ -21,13 +22,14 @@ const float OperatorConsole::GetY() const
 		return precisionFactor * 
 				((m_rightStick->GetY() < 0? -1:1) * pow(deadzone(m_rightStick->GetY()), squared? 2:1) + 
 				(m_leftStick->GetY() < 0? -1:1) * pow(deadzone(m_leftStick->GetY()), squared? 2:1))/2;
-	else
+	else {
 		float y = deadzone(m_rightStick->GetY());
 		if (squared) {
 			y *= fabs(y);
 		}
 		y *= precisionFactor;
 		return y;
+	}
 }
 
 const float OperatorConsole::GetTheta() const
