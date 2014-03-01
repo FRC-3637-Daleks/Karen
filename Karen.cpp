@@ -78,9 +78,14 @@ public:
 		m_pickup = 	new Pickup(m_direction = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
 				m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], 
 				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
-
-		m_table = NetworkTable::GetTable("autondata");
 		
+		try
+		{
+			m_table = NetworkTable::GetTable("autondata");
+		}
+		catch(exception e)
+		{
+		}
 		printf("Karen Constructor Completed\n");
 	}
 
@@ -114,7 +119,13 @@ public:
 	/********************************** Periodic Routines *************************************/
 
 	void DisabledPeriodic(void)  {
-		range = m_table->GetNumber("range");
+		try
+		{
+			range = m_table->GetNumber("range");
+		}
+		catch(exception e)
+		{
+		}
 	}
 
 	void AutonomousPeriodic(void) {
@@ -313,7 +324,7 @@ public:
 			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
 		}
 		
-		printf("Left reed switch: %d; Right reed switch: %d; Light Sensor: %d", (int)m_leftReed->Get(), (int)m_rightReed->Get(), (int)m_lightSensor->Get());
+		printf("Engaged: %d\n", (int)m_catapult->isAtStop());
 		m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));	
 	}
 
@@ -343,13 +354,20 @@ public:
 			{
 				if(!pullingBack && m_operatorConsole->Engage())
 				{
-					
 					pullingBack = true;
 				}
 				else if(pullingBack)
 				{
 					m_catapult->prepareFire();
 				}
+				else
+				{
+					m_catapult->unprepareFire();
+				}
+			}
+			else if(m_operatorConsole->Safe())
+			{
+				pullingBack = false;
 			}
 			else if(m_operatorConsole->Disengage() && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
 			{
@@ -396,10 +414,16 @@ public:
 private:
 	void getNetData()
 	{
-		if(m_table)
+		try
 		{
-			isHot = m_table->GetBoolean("ishot");
-			range = m_table->GetNumber("range");
+			if(m_table)
+			{
+				isHot = m_table->GetBoolean("ishot");
+				range = m_table->GetNumber("range");
+			}
+		}
+		catch(exception e)
+		{
 		}
 	}
 	
