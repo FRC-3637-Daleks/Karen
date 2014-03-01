@@ -61,7 +61,7 @@ Catapult::isLatched()
 bool
 Catapult::isAtStop()
 {
-	return (m_stop->Get() == 0);
+	return (m_stop->Get() == 1);
 }
 
 bool
