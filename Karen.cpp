@@ -14,7 +14,7 @@ class Karen : public IterativeRobot
 	OperatorConsole *m_operatorConsole;
 	DalekDrive *m_dalekDrive;
 	Catapult *m_catapult;
-	Pickup /*truck*/ *m_pickup;
+	Pickup *m_pickup;
 	Maxbotix *m_ultraSonicSensor;
 
 	// Pointers to allocated resources
@@ -36,10 +36,11 @@ class Karen : public IterativeRobot
 	bool isHot;
 	Timer autonTime;
 	Timer testWait;
-public:
 
-	Karen() {
-		printf("PracticeRobot Constructor Started\n");
+public:
+	Karen()
+	{
+		printf("Karen Constructor Started\n");
 
 		m_compressor = 	new Compressor(DIO_PORTS::PRESSURE_SWITCH, RELAY_PORTS::COMPRESSER_RELAY);
 
@@ -91,82 +92,51 @@ public:
 
 	/********************************** Init Routines *************************************/
 
-	void RobotInit(void) {
+	void RobotInit(void)
+	{
 		printf("Built: %s %s\n", __DATE__, __TIME__);
 		SmartDashboard::init();
 		printf("RobotInit() completed.\n");
 	}
 
-	void DisabledInit(void) {
+	void DisabledInit(void)
+	{
+		// Nada
 	}
 
-	void AutonomousInit(void) {
+	void AutonomousInit(void)
+	{
 		m_compressor->Start();
 		autonTime.Stop();
 		autonTime.Reset();
 		fired = false;
 	}
 
-	void TeleopInit(void) {
-		
+	void TestInit(void)
+	{
+		// Nada
+	}
+
+	void TeleopInit(void)
+	{
 #ifdef DEBUG_DRIVE
 		for(UINT8 i = 0; i < DalekDrive::N_MOTORS; i++)
 			printf("motorFunction[%d] = %p\n", i, DalekDrive::Motor::mecFuncs[i]);
 #endif
-
 		m_compressor->Start();
 	}
 
 	/********************************** Periodic Routines *************************************/
 
-	void DisabledPeriodic(void)  {
-#ifdef AUTONOMOUS
-		try
-		{
-			range = m_table->GetNumber("range");
-		}
-		catch(exception e)
-		{
-		}
-#endif
-		/*if(!SmartDashboard::GetBoolean("Auton"))
-			return;
-		*/
+	void DisabledPeriodic(void)
+	{
+		// Nada
+		PollSensorData();
 	}
 
-	void AutonomousPeriodic(void) {
-#ifdef AUTONOMOUS
-		if(!SmartDashboard::GetBoolean("Auton"))
-			return;
-		getNetData();
-		static float vel = 0.0;
-		if(range < MIN_GOAL_RANGE_INCHES)
-		{
-			vel = vel > 0.75? 0.75:vel+0.05;
-		}
-		else if(range > MAX_GOAL_RANGE_INCHES)
-		{
-			vel = vel < -0.75? -0.75:vel-0.05;
-		}
-		else
-		{
-			vel -= fabs(vel)/vel*0.05;
-			m_dalekDrive->Drive(0.0, 0.0, 0.0);
-		}
-		
-		m_dalekDrive->Drive(0.0, vel, 0.0);
-		
-		if((isHot || autonTime.Get() > 8.0) && range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES)
-			m_catapult->Fire();
-		else
-		{
-			m_catapult->prepareFire();
-			m_pickup->SetPos(Pickup::PICKUP_DOWN);
-		}
-		
-		m_pickup->SetRoller(-1.0);
-#else
-//		if(range > MAX_GOAL_RANGE_INCHES)
+	void AutonomousPeriodic(void)
+	{
+		PollSensorData();
 		if(fired)
 		{
 			if(autonTime.Get() < 6.0)
@@ -189,166 +159,12 @@ public:
 				m_catapult->Fire();
 			}
 		}
-#endif
 	}
 
-	void TestInit(void)
+	void TestPeriodic(void)
 	{
-		printf("Beginning Test Init\n");
-		m_compressor->Start();
-		testWait.Start();
-	}
-
-	void TestPeriodic(void) {
-		static int stage = 0;
-		static bool waiting = true;
-		if(stage >= 8)
-			return;
-		
-		if(testWait.Get() > 1.0)
-		{
-			switch(stage)
-			{
-			case 0:
-				{
-					static float rollerVel = 0.0;
-					if(waiting)
-						printf("Rollers ramping up\n");
-					m_pickup->SetRoller(rollerVel += 0.05 > 1.0? 1.0:rollerVel);
-					if(rollerVel == 1.0)
-						printf("Rollers at 100%%\n");
-					if(testWait.Get() > 5.0)
-					{
-						printf("Stopping\n");
-						m_pickup->SetRoller(0.0);
-						testWait.Reset();
-					}
-					break;
-				}
-			case 1:
-				{
-					static float rollerBackVel = 0.0;
-					if(waiting)
-						printf("Rollers ramping backwards\n");
-					m_pickup->SetRoller(rollerBackVel -= 0.05 < -1.0? -1.0:rollerBackVel);
-					if(rollerBackVel == -1.0)
-						printf("Rollers at -100%%\n");
-					if(testWait.Get() > 5.0)
-					{
-						printf("Stopping\n");
-						m_pickup->SetRoller(0.0);
-						testWait.Reset();
-					}
-					break;
-				}
-			case 2:
-				{
-					if(waiting)
-						printf("Moving arms up in 1 second, clear!\n");
-					if(testWait.Get() > 2.0)
-					{
-						m_pickup->Up();
-					}
-					if(testWait.Get() > 5.0)
-					{
-						printf("Up\n");
-						testWait.Reset();
-					}
-					break;
-				}
-			case 3:
-				{
-					if(waiting)
-						printf("Moving arms to center in 1 second, clear!\n");
-					if(testWait.Get() > 2.0)
-					{
-						m_pickup->CenterArms();
-					}
-					if(testWait.Get() > 5.0)
-					{
-						printf("Stopped at Middle\n");
-						testWait.Reset();
-					}
-					break;
-				}
-			case 4:
-				{
-					if(waiting)
-						printf("Moving arms down in 1 second, clear!\n");
-					if(testWait.Get() > 2.0)
-					{
-						m_pickup->Down();
-					}
-					if(testWait.Get() > 5.0)
-					{
-						printf("Down\n");
-						testWait.Reset();
-					}
-					break;
-				}
-			case 5:
-				{
-					if(waiting)
-						printf("Cocking capapult\n");
-					m_catapult->PrepareFire();
-					if(testWait.Get() > 5.0)
-					{
-						printf("Cocked\n");
-						testWait.Reset();
-					}
-					break;
-				}
-			case 6:
-				{
-					if(waiting)
-						printf("Gently releasing, maybe\n");
-					m_solenoids[SOLENOIDS::CLUTCH_ON-1]->Set(true);
-					if(testWait.Get() > 2.0)
-					{
-						m_solenoids[SOLENOIDS::LATCH_IN-1]->Set(true);
-						m_solenoids[SOLENOIDS::LATCH_OUT-1]->Set(false);
-						m_winch->Set(-0.1);
-					}
-					break;
-				}
-			case 7:
-				{
-					printf("Okai bi\n");
-					stage++;
-				}
-			}
-			waiting = false;
-		}
-		else
-		{
-			if(!waiting)
-				stage++;
-			if(!m_operatorConsole->GetTestContinue())
-				testWait.Reset();
-			waiting = true;			
-		}
-		
-		
-		/*ManualPeriodic();
-		if(m_gamePad->GetAxis(GamePad::PAD_Y) > 0.5)
-		{
-			m_direction->Open();
-			m_stop->Open();
-		}
-		else if(m_gamePad->GetAxis(GamePad::PAD_Y) < -0.5)
-		{
-			m_stop->Open();
-			m_direction->Close();
-		}
-		else
-		{
-			m_stop->Close();
-		}
-
-		m_winch->Set(0.5*m_gamePad->GetAxis(GamePad::LEFT_Y));
-		m_pickup->SetRoller(-m_gamePad->GetAxis(GamePad::RIGHT_Y));
-		printf("Left reed switch: %d; Right reed switch: %d; Light Sensor: %d", (int)m_leftReed->Get(), (int)m_rightReed->Get(), (int)m_lightSensor->Get());
-		*/
+		// Nada
+		PollSensorData();
 	}
 
 	void ManualPeriodic(void)
@@ -361,10 +177,11 @@ public:
 		m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));	
 	}
 
-	void TeleopPeriodic(void) {
-		// increment the number of teleop periodic loops completedgit
+	void TeleopPeriodic(void)
+	{
+		PollSensorData();
+		// increment the number of teleop periodic loops completed
 
-//		m_operatorConsole->SetPrecision(-1.0);
 		m_operatorConsole->SetSquared(m_rightStick->GetZ() > 0.5);		
 
 		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
@@ -374,17 +191,10 @@ public:
 
 		// Pickup roller
 		m_pickup->SetRoller(-m_operatorConsole->GetRoller());
-		
-#ifdef DEBUG_KAREN
-		printf("Drive Complete\n");
-#endif
 
 		if(!m_operatorConsole->GetOverride())
 		{
 			// Normal Control Mode
-#ifdef DEBUG_KAREN
-			printf("Override Mode\n");
-#endif
 
 			// CATAPULT
 			if (m_operatorConsole->CatapultPrepareFire()) {
@@ -396,10 +206,6 @@ public:
 				m_catapult->Fire();
 			}
 
-#ifdef DEBUG_KAREN
-			printf("Catapult Complete\n");
-#endif
-
 			// ROLLERS
 			if (m_operatorConsole->RollerUp()) {
 				m_pickup->Up();
@@ -407,50 +213,26 @@ public:
 				m_pickup->Down();
 			}
 
-#ifdef DEBUG_KAREN
-			printf("Roller Complete\n");
-#endif
 		} 
 		else
 		{
 			// Debug manual mode
 			ManualPeriodic();
 		}
-			//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
-			//		SmartDashboard::PutNumber("DistanceFromWall", m_ultraSonicSensor->GetRangeInInches());
-
 		UpdateDash();
-#ifdef DEBUG_KAREN
-			printf("Teleop Periodic Looped\n");
-#endif
-		} // TeleopPeriodic(void)
+	} // TeleopPeriodic(void)
 
 private:
-	void getNetData()
+	void PollSensorData()
 	{
-#ifdef AUTONOMOUS
-		try
-		{
-			if(m_table)
-			{
-				isHot = m_table->GetBoolean("ishot");
-				range = m_table->GetNumber("range");
-			}
-		}
-		catch(exception e)
-		{
-		}
-#else
 		if(m_ultraSonicSensor)
 			range = m_ultraSonicSensor->GetRangeInInches();
-			
-#endif
 	}
-	
+
 	void UpdateDash()
 	{
 		SmartDashboard::PutNumber("CatapultState", (int)m_catapult->GetState());
-		
+
 		switch(m_pickup->GetState())
 		{
 		case Pickup::PICKUP_STATE_DOWN:
@@ -466,22 +248,13 @@ private:
 			SmartDashboard::PutString("PickupAt", "???");
 			break;
 		}
-		
-		//SmartDashboard::PutBoolean("Hot", isHot);  // Make Indicator Light
-
 		SmartDashboard::PutNumber("Range", range); // Make at least hard print, at best progress bar with print
-		
+
 		SmartDashboard::PutNumber("X", m_operatorConsole->GetX());
 		SmartDashboard::PutNumber("Y", m_operatorConsole->GetY());
 		SmartDashboard::PutNumber("Theta", m_operatorConsole->GetTheta());
-		
-//		SmartDashboard::PutNumber("Precision", m_operatorConsole->GetPrecision());  // Make Indicator Light
-//		SmartDashboard::PutBoolean("InRange", range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES);  // Prints if it's in right range
 
-		
 	}
-	
-	
 };
 
-	START_ROBOT_CLASS(Karen);
+START_ROBOT_CLASS(Karen);
