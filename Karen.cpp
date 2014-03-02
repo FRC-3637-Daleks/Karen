@@ -102,6 +102,7 @@ public:
 	}
 
 	void AutonomousInit(void) {
+		m_compressor->Start();
 		autonTime.Stop();
 		autonTime.Reset();
 		fired = false;
