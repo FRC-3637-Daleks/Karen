@@ -5,7 +5,7 @@ Pickup::Pickup(Valve * const direction, Solenoid * const stop, Solenoid * const 
 		m_direction(direction), m_stop(stop), m_move(move), m_roller(roller), 
 		m_middleLeft(midLeft), m_middleRight(midRight), allocated(false), targetPos(start), location(start) 
 {
-	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds);
+	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds, 150);
 	m_reedWatch->Start((uint32_t)this);
 	Stop();
 	
@@ -15,7 +15,7 @@ Pickup::Pickup(Valve& direction, Solenoid& stop, Solenoid& move, Talon& roller, 
 		m_direction(&direction), m_stop(&stop), m_move(&move), m_roller(&roller), 
 		m_middleLeft(&midLeft), m_middleRight(&midRight), allocated(false), targetPos(start), location(start)
 {
-	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds);
+	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds, 150);
 	m_reedWatch->Start((uint32_t)this);
 	Stop();
 }
@@ -26,7 +26,7 @@ Pickup::Pickup(const UINT8 top, const UINT8 bottom, const UINT8 stop_a, const UI
 		m_middleLeft(new DigitalInput(midLeft)), m_middleRight(new DigitalInput(midRight)), allocated(true), 
 		targetPos(start), location(start)
 {
-	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds);
+	m_reedWatch = new Task("reedMonitor", (FUNCPTR)WatchReeds, 150);
 	m_reedWatch->Start((uint32_t)this);
 	Stop();
 }
