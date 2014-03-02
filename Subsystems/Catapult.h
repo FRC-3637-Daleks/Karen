@@ -32,10 +32,10 @@ public:
 		CATAPULT_STATE_ERELEASE // Emergency release
 	};
 
-	catapult_state getState();
+	catapult_state GetState();
 	void Fire();
-	void prepareFire();
-	void unprepareFire();
+	void PrepareFire();
+	void UnprepareFire();
 
 private:
 	catapult_state m_state;

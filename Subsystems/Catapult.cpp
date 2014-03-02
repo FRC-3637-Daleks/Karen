@@ -47,7 +47,7 @@ Catapult::Catapult(UINT32 winch, UINT32 stepA, UINT32 stepB,
 }
 
 Catapult::catapult_state
-Catapult::getState()
+Catapult::GetState()
 {
 	return m_state;
 }
@@ -68,7 +68,7 @@ Catapult::Fire()
 }
 
 void
-Catapult::prepareFire()
+Catapult::PrepareFire()
 {
 	switch(m_state) {
 	case CATAPULT_STATE_NOT_READY:
@@ -107,7 +107,7 @@ Catapult::prepareFire()
 }
 
 void
-Catapult::unprepareFire()
+Catapult::UnprepareFire()
 {
 	switch(m_state) {
 	case CATAPULT_STATE_READY:

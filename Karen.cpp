@@ -174,9 +174,9 @@ public:
 			else
 				m_dalekDrive->Drive(0.0, 0.0, 0.0);
 		}
-		else if(m_catapult->getState() == Catapult::CATAPULT_STATE_NOT_READY)
+		else if(m_catapult->GetState() == Catapult::CATAPULT_STATE_NOT_READY)
 		{
-			m_catapult->prepareFire();
+			m_catapult->PrepareFire();
 			m_pickup->CenterArms();
 		}
 		else
@@ -292,7 +292,7 @@ public:
 				{
 					if(waiting)
 						printf("Cocking capapult\n");
-					m_catapult->prepareFire();
+					m_catapult->PrepareFire();
 					if(testWait.Get() > 5.0)
 					{
 						printf("Cocked\n");
@@ -387,9 +387,9 @@ public:
 
 			// CATAPULT
 			if (m_operatorConsole->CatapultPrepareFire()) {
-				m_catapult->prepareFire();
+				m_catapult->PrepareFire();
 			} else if (m_operatorConsole->CatapultEmergencyRelease()) {
-				m_catapult->unprepareFire();
+				m_catapult->UnprepareFire();
 			} else if (m_operatorConsole->CatapultFire() && m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN) {
 				// The catapult should only fire if the pickup arms are down
 				m_catapult->Fire();
@@ -455,7 +455,7 @@ private:
 	
 	void UpdateDash()
 	{
-		SmartDashboard::PutNumber("CatapultState", (int)m_catapult->getState());
+		SmartDashboard::PutNumber("CatapultState", (int)m_catapult->GetState());
 		
 		switch(m_pickup->GetState())
 		{
