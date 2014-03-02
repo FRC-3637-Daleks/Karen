@@ -95,7 +95,7 @@ void Pickup::CheckArms() {
 	// Lock arms immediately when reached middle position. Must be done here to catch the reed switch.
 	if (m_targetMiddle && (!m_middleLeftReed->Get() || !m_middleRightReed->Get())) {
 #ifdef DEBUG_PICKUP
-		printf("Pickup: Reeds triggered latch")
+		printf("Pickup: Reeds triggered latch");
 #endif
 		Lock();
 		m_state = PICKUP_STATE_MIDDLE;
