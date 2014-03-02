@@ -13,13 +13,6 @@ public:
 		PICKUP_STATE_DOWN,
 		PICKUP_STATE_MIDDLE,
 		PICKUP_STATE_UP,
-		PICKUP_STATE_NONE
-	};
-
-	enum pickup_direction {
-		PICKUP_DIRECTION_UP,
-		PICKUP_DIRECTION_DOWN,
-		PICKUP_DIRECTION_LOCKED
 	};
 
 private:
@@ -32,8 +25,7 @@ private:
 	Task *m_reedWatch;
 
 	bool allocated;
-	pickup_direction m_movementDirection;
-	pickup_state m_targetState;
+	bool m_targetMiddle;
 	pickup_state m_state;
 
 public:
@@ -52,9 +44,7 @@ public:
 	void Unlock();
 	bool CenterArms();
 
-	const bool SetPos(const pickup_state pos); // returns true if it's at the spot
-	void CheckArms(); // runs code  previously in set pos which is tracking the piston position
-	const pickup_state GetTarget() const {return m_targetState;};   // returns the current target position
+	void CheckArms(); // Checks the reed, and locks it when needed
 	const pickup_state GetState() const {return m_state;};	// returns the current location of the piston
 
 public:
@@ -65,6 +55,5 @@ public:
 };
 
 void WatchReeds(Pickup *armsObj);  // Main Thread function which watches the arm position
-
 
 #endif /*_PICKUP_H_*/
