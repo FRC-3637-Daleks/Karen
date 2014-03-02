@@ -81,7 +81,7 @@ Valve::isValid()
 bool
 Valve::isOpen()
 {
-	if(/*isValid()*/1) {
+	if(isValid()) {
 		if(m_a->Get())
 			return true;
 	}

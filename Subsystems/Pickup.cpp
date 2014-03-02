@@ -133,6 +133,6 @@ Pickup::~Pickup() {
 void WatchReeds(Pickup *armsObj) {
 	while (true) {
 		armsObj->CheckArms();
-		sleep(1); // Give up the thread so we do not cause a busy wake
+//		sleep(1); // Give up the thread so we do not cause a busy wake
 	}
 }
