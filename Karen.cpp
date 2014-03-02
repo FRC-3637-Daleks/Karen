@@ -169,19 +169,10 @@ public:
 		m_pickup->SetRoller(-1.0);
 #else
 //		if(range > MAX_GOAL_RANGE_INCHES)
-		if(fired)
-		{
-			if(autonTime.Get() < 6.0)
-				m_dalekDrive->Drive(0.0, -0.3, 0.0);
-			else
-				m_dalekDrive->Drive(0.0, 0.0, 0.0);
-		}
-		else if(!m_catapult->lockedAndloaded())
-		{
-			m_catapult->prepareFire();
-			m_pickup->SetPos(Pickup::PICKUP_MIDDLE);
-		}
-		else
+		if(autonTime.Get() < 6.0 && autonTime.Get() > 1.0)
+			m_dalekDrive->Drive(0.0, -0.3, 0.0);
+		
+		if(m_catapult->lockedAndloaded() && autonTime.Get() < 0.01)
 		{
 			autonTime.Start();
 			m_pickup->SetPos(Pickup::PICKUP_DOWN);
@@ -190,6 +181,12 @@ public:
 				fired = true;
 				m_catapult->Fire();
 			}
+		}
+		else 
+		{
+			m_catapult->prepareFire();
+			m_pickup->SetPos(Pickup::PICKUP_MIDDLE);
+			m_dalekDrive->Drive(0.0, 0.0, 0.0);
 		}
 #endif
 	}
