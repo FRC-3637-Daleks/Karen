@@ -506,6 +506,7 @@ private:
 		
 //		SmartDashboard::PutNumber("Precision", m_operatorConsole->GetPrecision());  // Make Indicator Light
 //		SmartDashboard::PutBoolean("InRange", range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES);  // Prints if it's in right range
+
 		
 	}
 	
