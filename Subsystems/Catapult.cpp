@@ -11,10 +11,8 @@ Catapult::Catapult(Talon *winch, Encoder *step,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = stop;
-	m_latchEngage       = false;
-	m_stopActive         = false;
-	m_needFree           = false;
 	m_backOffAmt         = 100;
+	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
 
@@ -28,10 +26,8 @@ Catapult::Catapult(Talon &winch, Encoder &step,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = &stop;
-	m_latchEngage       = false;
-	m_stopActive         = false;
-	m_needFree           = false;
 	m_backOffAmt         = 100;
+	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
 
@@ -45,102 +41,94 @@ Catapult::Catapult(UINT32 winch, UINT32 stepA, UINT32 stepB,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = new DigitalInput(stop);
-	m_latchEngage        = false;
-	m_stopActive         = false;
-	m_needFree           = true;
 	m_backOffAmt         = 100;
+	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
 
-bool
-Catapult::isLatched()
+Catapult::catapult_state
+Catapult::getState()
 {
-	return m_latch->isClosed();
-}
-
-bool
-Catapult::isAtStop()
-{
-	return (m_stop->Get() == 1);
-}
-
-bool
-Catapult::lockedAndloaded()
-{
-	static int wasAtStopAndLatched = 0;
-	if(isLatched() && isAtStop())
-		wasAtStopAndLatched++;
-	if((isAtStop() || wasAtStopAndLatched > STOPPED_AND_LATCHED_ITERATIONS) &&  
-			// requires it be at stop and latched for a certain amount of time
-	   isLatched() &&
-	   m_shift->isOpen())
-	{
-		m_winch->Set(0.0);
-		return true;
-	}
-	
-	wasAtStopAndLatched = 0;
-	return false;
+	return m_state;
 }
 
 void
 Catapult::Fire()
 {
-	if(lockedAndloaded())
+	switch(m_state) {
+	case CATAPULT_STATE_READY:
+#ifdef DEBUG_CATAPULT
+			printf("Catapult: Firing")
+#endif
 		m_latch->Open();
-	return;
+		m_state = CATAPULT_STATE_FIRING;
+	default:
+		break;
+	}
 }
 
 void
 Catapult::prepareFire()
 {
-	static UINT32 cnt=0;
-	
-	if(!isAtStop() && !isLatched()) {
+	switch(m_state) {
+	case CATAPULT_STATE_NOT_READY:
+#ifdef DEBUG_CATAPULT
+		printf("Catapult: Prepare fire");
+#endif
 		m_shift->Close();
+		m_latch->Open();
+		m_state = CATAPULT_STATE_PULLING_BACK;
+		break;
+	case CATAPULT_STATE_PULLING_BACK:
 		m_winch->Set(-0.7);
-	}
-	else if(!isLatched()) {
+		if (m_stop->Get() == 1) {
+			m_state = CATAPULT_STATE_LATCHING;
+		}
+		break;
+	case CATAPULT_STATE_LATCHING:
+#ifdef DEBUG_CATAPULT
+			printf("Catapult: Latching")
+#endif
 		m_winch->Set(0.0);
-		m_latch->Close();
-	}
-	else if(!lockedAndloaded()){
-		if(cnt == 0)
-			cnt = m_step->Get();
-#ifdef DEBUG_CATAPULT
-		printf("cnt: %d\ncurrent encoder: %d\nabsolute value of the difference of these: %d", cnt, m_step->Get(), abs(m_step->Get() - cnt));
-#endif
+		m_encoderStart = m_step->Get();
+		m_state = CATAPULT_STATE_BACKDRIVING;
+		break;
+	case CATAPULT_STATE_BACKDRIVING:
 		m_winch->Set(0.5);
-		if(abs(m_step->Get() - cnt) > m_backOffAmt) {
-#ifdef DEBUG_CATAPULT
-			printf("Just for kicks\n");
-#endif
+		if(abs(m_step->Get() - m_encoderStart) > m_backOffAmt) {
 			m_winch->Set(0.0);
 			m_shift->Open();
-			cnt = 0;
+			m_state = CATAPULT_STATE_READY;
 		}
+		break;
+	default:
+		break;
 	}
-	/*else
-	{
-		m_winch->Set(0.0);
-	}*/
 }
 
 void
 Catapult::unprepareFire()
 {
-	if(lockedAndloaded())
-	{
+	switch(m_state) {
+	case CATAPULT_STATE_READY:
+		m_encoderStart = m_step->Get();
 		m_shift->Close();
-		m_latch->Open();
-	}
-	else if(abs(m_step->Get()) > 10)
-	{
+		m_state = CATAPULT_STATE_ERELEASE;
+		break;
+	case CATAPULT_STATE_ERELEASE:
+		// Drive forward to ensure the shifter catches
 		m_winch->Set(0.3);
-	}
-	else
-	{
-		m_winch->Set(0.0);
+		if(abs(m_step->Get() - m_encoderStart) > 10) {
+#ifdef DEBUG_CATAPULT
+			printf("Catapult: Emergency Release")
+#endif
+			m_winch->Set(0.0);
+			m_latch->Open();
+			m_state = CATAPULT_STATE_READY;
+		}
+		break;
+	default:
+		break;
 	}
 }
 

@@ -10,5 +10,4 @@
 //#define DEBUG_CATAPULT
 //#define DEBUG_KAREN
 
-
 #endif /*_DEFINES_H_*/

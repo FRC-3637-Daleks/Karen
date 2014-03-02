@@ -31,7 +31,6 @@ class Karen : public IterativeRobot
 	NetworkTable *m_table;
 
 	// Miscellaneous variables
-	bool pullingBack;
 	double range;
 	bool isHot;
 	Timer autonTime;
@@ -112,7 +111,6 @@ public:
 			printf("motorFunction[%d] = %p\n", i, DalekDrive::Motor::mecFuncs[i]);
 #endif
 
-		pullingBack = false;
 		m_compressor->Start();
 	}
 
@@ -335,8 +333,7 @@ public:
 		{
 			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
 		}
-		
-		printf("Engaged: %d\n", (int)m_catapult->isAtStop());
+
 		m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));	
 	}
 
@@ -357,33 +354,18 @@ public:
 
 		if(!m_operatorConsole->GetOverride())
 		{
+			// Normal Control Mode
 #ifdef DEBUG_KAREN
 			printf("Override Mode\n");
 #endif
 
 			// CATAPULT
-			if(!m_catapult->lockedAndloaded())
-			{
-				if(!pullingBack && m_operatorConsole->Engage())
-				{
-					pullingBack = true;
-				}
-				else if(pullingBack)
-				{
-					m_catapult->prepareFire();
-				}
-				else
-				{
-//					m_catapult->unprepareFire();
-				}
-			}
-			else if(m_operatorConsole->Safe())
-			{
-				pullingBack = false;
-			}
-			else if(m_operatorConsole->Disengage() && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
-			{
-				pullingBack = false;
+			if (m_operatorConsole->CatapultPrepareFire()) {
+				m_catapult->prepareFire();
+			} else if (m_operatorConsole->CatapultEmergencyRelease()) {
+				m_catapult->unprepareFire();
+			} else if (m_operatorConsole->CatapultFire() && m_pickup->GetLocation() == Pickup::PICKUP_DOWN) {
+				// The catapult should only fire if the pickup arms are down
 				m_catapult->Fire();
 			}
 
@@ -411,6 +393,7 @@ public:
 		} 
 		else
 		{
+			// Debug manual mode
 			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 			ManualPeriodic();
 		}
@@ -447,7 +430,7 @@ private:
 	
 	void UpdateDash()
 	{
-		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());  // Make Indicator Light
+		SmartDashboard::PutNumber("CatapultState", (int)m_catapult->getState());
 		
 		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());  // Make Progress Bar
 		switch(m_pickup->GetLocation()) 
