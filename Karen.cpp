@@ -77,7 +77,7 @@ public:
 		// Define Pickup system members
 		m_pickup = 	new Pickup(m_direction = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
 				m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], 
-				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed, Pickup::PICKUP_UP);
+				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed);
 		
 		try
 		{
@@ -225,10 +225,11 @@ public:
 						printf("Moving arms up in 1 second, clear!\n");
 					if(testWait.Get() > 2.0)
 					{
-						m_pickup->SetPos(Pickup::PICKUP_UP);
+						m_pickup->Up();
 					}
 					if(testWait.Get() > 5.0)
 					{
+						m_pickup->Lock();
 						printf("Up\n");
 						testWait.Reset();
 					}
@@ -240,7 +241,7 @@ public:
 						printf("Moving arms to center in 1 second, clear!\n");
 					if(testWait.Get() > 2.0)
 					{
-						m_pickup->SetPos(Pickup::PICKUP_MIDDLE);
+						m_pickup->CenterArms();
 					}
 					if(testWait.Get() > 5.0)
 					{
@@ -255,10 +256,11 @@ public:
 						printf("Moving arms down in 1 second, clear!\n");
 					if(testWait.Get() > 2.0)
 					{
-						m_pickup->SetPos(Pickup::PICKUP_DOWN);
+						m_pickup->Down();
 					}
 					if(testWait.Get() > 5.0)
 					{
+						m_pickup->Lock();
 						printf("Down\n");
 						testWait.Reset();
 					}
@@ -381,7 +383,7 @@ public:
 			{
 				pullingBack = false;
 			}
-			else if(m_operatorConsole->Disengage() && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
+			else if(m_operatorConsole->Disengage() && m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN)
 			{
 				pullingBack = false;
 				m_catapult->Fire();
@@ -396,13 +398,12 @@ public:
 
 			// ROLLER POSITION
 			//printf("Roller Direction: %d\n", m_operatorConsole->GetRollerDirection());
-			if(m_operatorConsole->GetRollerDirection() > 0)
-				m_pickup->SetPos(Pickup::PICKUP_UP);
-			else if(m_operatorConsole->GetRollerDirection() < 0)
-				m_pickup->SetPos(Pickup::PICKUP_DOWN);
-			else
-			{
-				m_pickup->Stop();
+			if (m_operatorConsole->RollerUp()) {
+				m_pickup->Up();
+			} else if (m_operatorConsole->RollerDown()) {
+				m_pickup->Down();
+			} else {
+				m_pickup->Lock();
 			}
 
 #ifdef DEBUG_KAREN
@@ -449,16 +450,15 @@ private:
 	{
 		SmartDashboard::PutBoolean("LockedAndLoaded", m_catapult->lockedAndloaded());  // Make Indicator Light
 		
-		SmartDashboard::PutNumber("PickupPosition", m_operatorConsole->GetRollerPosition());  // Make Progress Bar
-		switch(m_pickup->GetLocation()) 
+		switch(m_pickup->GetState())
 		{
-		case Pickup::PICKUP_DOWN:
+		case Pickup::PICKUP_STATE_DOWN:
 			SmartDashboard::PutString("PickupAt", "DOWN");
 			break;
-		case Pickup::PICKUP_MIDDLE:
+		case Pickup::PICKUP_STATE_MIDDLE:
 			SmartDashboard::PutString("PickupAt", "VERTICAL");
 			break;
-		case Pickup::PICKUP_UP:
+		case Pickup::PICKUP_STATE_UP:
 			SmartDashboard::PutString("PickupAt", "UP");
 			break;
 		default:

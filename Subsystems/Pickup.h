@@ -9,47 +9,57 @@
 class Pickup
 {
 public:
-	enum {PICKUP_DOWN, PICKUP_MIDDLE, PICKUP_UP};
-	
+	enum pickup_state {
+		PICKUP_STATE_DOWN,
+		PICKUP_STATE_MIDDLE,
+		PICKUP_STATE_UP,
+		PICKUP_STATE_NONE
+	};
+
+	enum pickup_direction {
+		PICKUP_DIRECTION_UP,
+		PICKUP_DIRECTION_DOWN,
+		PICKUP_DIRECTION_LOCKED
+	};
+
 private:
 	Valve *m_direction;
-	//Valve *m_stop;
 	Solenoid *m_stop;
 	Solenoid *m_move;
 	Talon *m_roller;
-	DigitalInput *m_middleLeft;
-	DigitalInput *m_middleRight;
+	DigitalInput *m_middleLeftReed;
+	DigitalInput *m_middleRightReed;
 	Task *m_reedWatch;
-	
+
 	bool allocated;
-	int targetPos;
-	int location;
-	
+	pickup_direction m_movementDirection;
+	pickup_state m_targetState;
+	pickup_state m_state;
+
 public:
 	Pickup(Valve * const direction, Solenoid* const stop, Solenoid * const move, Talon * const roller, 
-			DigitalInput *midLeft, DigitalInput *midRight, const int start);
-	
+			DigitalInput *midLeft, DigitalInput *midRight);
+
 	Pickup(Valve& direction, Solenoid &stop, Solenoid &move, Talon& roller, 
-			DigitalInput& midLeft, DigitalInput& midRight, const int start);
-	
+			DigitalInput& midLeft, DigitalInput& midRight);
+
 	Pickup(const UINT8 top, const UINT8 bottom, const UINT8 stop_a, const UINT8 stop_b, const UINT8 roller,
-			const UINT8 midLeft, const UINT8 midRight, const int start);
-	
-private:
+			const UINT8 midLeft, const UINT8 midRight);
+
 	void Up();
 	void Down();
-	
-public:
-	void Stop();
-	
-	const bool SetPos(const int pos); // returns true if it's at the spot
+	void Lock();
+	void Unlock();
+	bool CenterArms();
+
+	const bool SetPos(const pickup_state pos); // returns true if it's at the spot
 	void CheckArms(); // runs code  previously in set pos which is tracking the piston position
-	const int GetTarget() const {return targetPos;};   // returns the current target position
-	const int GetLocation() const {return location;};	// returns the current location of the piston
-	
+	const pickup_state GetTarget() const {return m_targetState;};   // returns the current target position
+	const pickup_state GetState() const {return m_state;};	// returns the current location of the piston
+
 public:
 	void SetRoller(const float vel) {if(m_roller) m_roller->Set(vel);};
-	
+
 public:
 	~Pickup();
 };
