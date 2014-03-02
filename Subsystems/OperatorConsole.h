@@ -66,6 +66,7 @@ public:
 	const int GetDrive() const  {return drive;};
 	
 	const bool GetOverride();
+	const bool ManualEngage() {return m_gamePad->GetButton(GamePad::B4);};
 	const bool GetTestContinue() const {return m_gamePad->GetButton(GamePad::B3);};
 	
 private:

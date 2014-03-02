@@ -32,6 +32,7 @@ class Karen : public IterativeRobot
 
 	// Miscellaneous variables
 	bool pullingBack;
+	bool fired;
 	double range;
 	bool isHot;
 	Timer autonTime;
@@ -101,8 +102,9 @@ public:
 	}
 
 	void AutonomousInit(void) {
+		autonTime.Stop();
 		autonTime.Reset();
-		autonTime.Start();
+		fired = false;
 	}
 
 	void TeleopInit(void) {
@@ -119,6 +121,7 @@ public:
 	/********************************** Periodic Routines *************************************/
 
 	void DisabledPeriodic(void)  {
+#ifdef AUTONOMOUS
 		try
 		{
 			range = m_table->GetNumber("range");
@@ -126,13 +129,14 @@ public:
 		catch(exception e)
 		{
 		}
-		
-		if(!SmartDashboard::GetBoolean("Auton"))
+#endif
+		/*if(!SmartDashboard::GetBoolean("Auton"))
 			return;
-		
+		*/
 	}
 
 	void AutonomousPeriodic(void) {
+#ifdef AUTONOMOUS
 		if(!SmartDashboard::GetBoolean("Auton"))
 			return;
 		getNetData();
@@ -162,6 +166,31 @@ public:
 		}
 		
 		m_pickup->SetRoller(-1.0);
+#else
+//		if(range > MAX_GOAL_RANGE_INCHES)
+		if(fired)
+		{
+			if(autonTime.Get() < 6.0)
+				m_dalekDrive->Drive(0.0, -0.3, 0.0);
+			else
+				m_dalekDrive->Drive(0.0, 0.0, 0.0);
+		}
+		else if(!m_catapult->lockedAndloaded())
+		{
+			m_catapult->prepareFire();
+			m_pickup->SetPos(Pickup::PICKUP_MIDDLE);
+		}
+		else
+		{
+			autonTime.Start();
+			m_pickup->SetPos(Pickup::PICKUP_DOWN);
+			if(autonTime.Get() > 1.5)
+			{
+				fired = true;
+				m_catapult->Fire();
+			}
+		}
+#endif
 	}
 
 	void TestInit(void)
@@ -337,11 +366,11 @@ public:
 	void TeleopPeriodic(void) {
 		// increment the number of teleop periodic loops completedgit
 
-		m_operatorConsole->SetPrecision((m_leftStick->GetZ()));
+//		m_operatorConsole->SetPrecision(-1.0);
 		m_operatorConsole->SetSquared(m_rightStick->GetZ() > 0.5);		
 
 		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
-			m_dalekDrive->Drive(m_operatorConsole->GetX(), -m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
+			m_dalekDrive->Drive(-m_operatorConsole->GetX(), m_operatorConsole->GetY(), -m_operatorConsole->GetTheta());
 		else
 			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());	
 		
@@ -356,6 +385,12 @@ public:
 #endif
 
 			// CATAPULT
+			/*
+			if(m_operatorConsole->Safe())
+				m_catapult->unprepareFire();
+				*/
+			m_catapult->setOverride(m_operatorConsole->ManualEngage());
+				
 			if(!m_catapult->lockedAndloaded())
 			{
 				if(!pullingBack && m_operatorConsole->Engage())
@@ -368,14 +403,14 @@ public:
 				}
 				else
 				{
-					m_catapult->unprepareFire();
+//					m_catapult->unprepareFire();
 				}
 			}
 			else if(m_operatorConsole->Safe())
 			{
 				pullingBack = false;
 			}
-			else if(m_operatorConsole->Disengage() && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
+			else if(m_operatorConsole->Disengage())// && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
 			{
 				pullingBack = false;
 				m_catapult->Fire();
@@ -405,6 +440,7 @@ public:
 		} 
 		else
 		{
+			pullingBack = false;
 			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 			ManualPeriodic();
 		}
@@ -420,6 +456,7 @@ public:
 private:
 	void getNetData()
 	{
+#ifdef AUTONOMOUS
 		try
 		{
 			if(m_table)
@@ -431,6 +468,11 @@ private:
 		catch(exception e)
 		{
 		}
+#else
+		if(m_ultraSonicSensor)
+			range = m_ultraSonicSensor->GetRangeInInches();
+			
+#endif
 	}
 	
 	void UpdateDash()
@@ -454,15 +496,20 @@ private:
 			break;
 		}
 		
-		SmartDashboard::PutBoolean("Hot", isHot);  // Make Indicator Light
+		//SmartDashboard::PutBoolean("Hot", isHot);  // Make Indicator Light
+
 		SmartDashboard::PutNumber("Range", range); // Make at least hard print, at best progress bar with print
 		
+		SmartDashboard::PutNumber("X", m_operatorConsole->GetX());
+		SmartDashboard::PutNumber("Y", m_operatorConsole->GetY());
+		SmartDashboard::PutNumber("Theta", m_operatorConsole->GetTheta());
 		
-		SmartDashboard::PutBoolean("Precision", m_operatorConsole->GetPrecision());  // Make Indicator Light
-		SmartDashboard::PutBoolean("InRange", range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES);  // Prints if it's in right range
+//		SmartDashboard::PutNumber("Precision", m_operatorConsole->GetPrecision());  // Make Indicator Light
+//		SmartDashboard::PutBoolean("InRange", range < MAX_GOAL_RANGE_INCHES && range > MIN_GOAL_RANGE_INCHES);  // Prints if it's in right range
 		
 	}
-
+	
+	
 };
 
 	START_ROBOT_CLASS(Karen);

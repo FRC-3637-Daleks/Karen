@@ -184,5 +184,6 @@ void WatchReeds(Pickup *armsObj)
 	while(true)
 	{
 		armsObj->CheckArms();
+//		sleep(1);
 	}
 }

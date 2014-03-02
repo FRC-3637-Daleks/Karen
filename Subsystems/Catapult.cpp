@@ -15,6 +15,7 @@ Catapult::Catapult(Talon *winch, Encoder *step,
 	m_stopActive         = false;
 	m_needFree           = false;
 	m_backOffAmt         = 100;
+	override             = false;
 	m_step->Start();
 }
 
@@ -32,6 +33,7 @@ Catapult::Catapult(Talon &winch, Encoder &step,
 	m_stopActive         = false;
 	m_needFree           = false;
 	m_backOffAmt         = 100;
+	override             = false;
 	m_step->Start();
 }
 
@@ -49,6 +51,7 @@ Catapult::Catapult(UINT32 winch, UINT32 stepA, UINT32 stepB,
 	m_stopActive         = false;
 	m_needFree           = true;
 	m_backOffAmt         = 100;
+	override             = false;
 	m_step->Start();
 }
 
@@ -61,16 +64,13 @@ Catapult::isLatched()
 bool
 Catapult::isAtStop()
 {
-	return (m_stop->Get() == 0);
+	return (m_stop->Get() == 1 || override);
 }
 
 bool
 Catapult::lockedAndloaded()
 {
-	static int wasAtStopAndLatched = 0;
-	if(isLatched() && isAtStop())
-		wasAtStopAndLatched++;
-	if((isAtStop() || wasAtStopAndLatched > STOPPED_AND_LATCHED_ITERATIONS) &&  
+	if(isAtStop() &&  
 			// requires it be at stop and latched for a certain amount of time
 	   isLatched() &&
 	   m_shift->isOpen())
@@ -78,8 +78,6 @@ Catapult::lockedAndloaded()
 		m_winch->Set(0.0);
 		return true;
 	}
-	
-	wasAtStopAndLatched = 0;
 	return false;
 }
 

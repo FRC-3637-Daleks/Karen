@@ -32,7 +32,7 @@ public:
 	void Fire();
 	void prepareFire();
 	void unprepareFire();
-	
+	void setOverride(const bool o) {override = o;};
 	
 private:
 	Talon *m_winch;
@@ -46,5 +46,6 @@ private:
 	bool m_stopActive;
 	bool m_needFree;
 	UINT32 m_backOffAmt;
+	bool override;
 };
 #endif
