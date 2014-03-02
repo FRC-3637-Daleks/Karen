@@ -127,18 +127,19 @@ Catapult::prepareFire()
 void
 Catapult::unprepareFire()
 {
-	if(lockedAndloaded())
+	static unsigned int cnt = 0;
+	if(m_shift->isOpen() || m_latch->isOpen())
 	{
+		cnt = 0;
 		m_shift->Close();
-		m_latch->Open();
 	}
-	else if(abs(m_step->Get()) > 10)
+	if(cnt > m_backOffAmt)
 	{
-		m_winch->Set(0.3);
+		m_latch->Open();
 	}
 	else
 	{
-		m_winch->Set(0.0);
+		cnt++;
 	}
 }
 

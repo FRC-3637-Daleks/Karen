@@ -368,7 +368,7 @@ public:
 		// increment the number of teleop periodic loops completedgit
 
 //		m_operatorConsole->SetPrecision(-1.0);
-		m_operatorConsole->SetSquared(m_rightStick->GetZ() > 0.5);		
+		m_operatorConsole->SetSquared(m_rightStick->GetZ() > 0.5);
 
 		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
 			m_dalekDrive->Drive(-m_operatorConsole->GetX(), m_operatorConsole->GetY(), -m_operatorConsole->GetTheta());
@@ -386,13 +386,14 @@ public:
 #endif
 
 			// CATAPULT
-			/*
-			if(m_operatorConsole->Safe())
-				m_catapult->unprepareFire();
-				*/
 			m_catapult->setOverride(m_operatorConsole->ManualEngage());
-				
-			if(!m_catapult->lockedAndloaded())
+
+			if(m_operatorConsole->Safe())
+			{
+				pullingBack = false;
+				m_catapult->unprepareFire();
+			}
+			else if(!m_catapult->lockedAndloaded())
 			{
 				if(!pullingBack && m_operatorConsole->Engage())
 				{
@@ -402,14 +403,6 @@ public:
 				{
 					m_catapult->prepareFire();
 				}
-				else
-				{
-//					m_catapult->unprepareFire();
-				}
-			}
-			else if(m_operatorConsole->Safe())
-			{
-				pullingBack = false;
 			}
 			else if(m_operatorConsole->Disengage())// && m_pickup->GetLocation() == Pickup::PICKUP_DOWN)
 			{
