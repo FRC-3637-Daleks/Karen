@@ -211,6 +211,8 @@ public:
 				m_pickup->Up();
 			} else if (m_operatorConsole->RollerDown()) {
 				m_pickup->Down();
+			} else if (m_operatorConsole->RollerCenter()) {
+				m_pickup->CenterArms();
 			}
 
 		} 

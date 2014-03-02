@@ -53,7 +53,8 @@ public:
 	const float GetRoller() const;		// returns roller velocity input
 	const bool RollerUp() const;
 	const bool RollerDown() const;
-	
+	const bool RollerCenter() const;
+
 public:
 	void SetSquared(const bool b) {squared = b;};
 	const bool GetSquared() const {return squared;};

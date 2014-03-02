@@ -83,6 +83,10 @@ const bool OperatorConsole::RollerDown() const
 {
 	return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER);
 }
+const bool OperatorConsole::RollerCenter() const
+{
+	return m_gamePad->GetButton(GamePad::B4);
+}
 
 const bool OperatorConsole::GetOverride()
 {
