@@ -78,7 +78,7 @@ public:
 		m_pickup = 	new Pickup(m_direction = new Valve(m_solenoids[SOLENOIDS::PICKUP_PISTONS_BOTTOM-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_TOP-1]), 
 				m_solenoids[SOLENOIDS::PICKUP_PISTONS_OPEN-1], m_solenoids[SOLENOIDS::PICKUP_PISTONS_STOP-1], 
 				new Talon(PWM_PORTS::ROLLER_TALONS), m_leftReed, m_rightReed);
-		
+
 		try
 		{
 			m_table = NetworkTable::GetTable("autondata");
@@ -229,7 +229,6 @@ public:
 					}
 					if(testWait.Get() > 5.0)
 					{
-						m_pickup->Lock();
 						printf("Up\n");
 						testWait.Reset();
 					}
@@ -260,7 +259,6 @@ public:
 					}
 					if(testWait.Get() > 5.0)
 					{
-						m_pickup->Lock();
 						printf("Down\n");
 						testWait.Reset();
 					}
@@ -351,7 +349,10 @@ public:
 		if(m_operatorConsole->GetDrive() == OperatorConsole::ARCADE_DRIVE)
 			m_dalekDrive->Drive(m_operatorConsole->GetX(), -m_operatorConsole->GetY(), m_operatorConsole->GetTheta());
 		else
-			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());	
+			m_dalekDrive->Drive(m_operatorConsole->GetLeft(), m_operatorConsole->GetRight());
+
+		// Pickup roller
+		m_pickup->SetRoller(-m_operatorConsole->GetRoller());
 		
 #ifdef DEBUG_KAREN
 		printf("Drive Complete\n");
@@ -393,17 +394,11 @@ public:
 			printf("Catapult Complete\n");
 #endif
 
-			// ROLLER SPEED
-			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
-
-			// ROLLER POSITION
-			//printf("Roller Direction: %d\n", m_operatorConsole->GetRollerDirection());
+			// ROLLERS
 			if (m_operatorConsole->RollerUp()) {
 				m_pickup->Up();
 			} else if (m_operatorConsole->RollerDown()) {
 				m_pickup->Down();
-			} else {
-				m_pickup->Lock();
 			}
 
 #ifdef DEBUG_KAREN
@@ -412,7 +407,7 @@ public:
 		} 
 		else
 		{
-			m_pickup->SetRoller(-m_operatorConsole->GetRoller());
+			// Debug manual mode
 			ManualPeriodic();
 		}
 			//m_pickup->SetPos(m_operatorConsole->GetRollerPosition());
