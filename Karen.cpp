@@ -132,6 +132,7 @@ public:
 	{
 		// Nada
 		PollSensorData();
+		UpdateDash();
 	}
 
 	void AutonomousPeriodic(void)
@@ -159,12 +160,14 @@ public:
 				m_catapult->Fire();
 			}
 		}
+		UpdateDash();
 	}
 
 	void TestPeriodic(void)
 	{
 		// Nada
 		PollSensorData();
+		UpdateDash();
 	}
 
 	void ManualPeriodic(void)
