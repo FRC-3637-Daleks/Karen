@@ -116,6 +116,7 @@ public:
 		m_compressor->Start();
 		autonTime.Stop();
 		autonTime.Reset();
+		autonTime.Start();
 		m_autonState = AUTON_STATE_PREPARE_FIRE;
 	}
 
