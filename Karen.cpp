@@ -170,16 +170,6 @@ public:
 		UpdateDash();
 	}
 
-	void ManualPeriodic(void)
-	{
-		for(UINT8 i = 0; i < SOLENOIDS::PICKUP_PISTONS_TOP; i++)
-		{
-			m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
-		}
-
-		m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));	
-	}
-
 	void TeleopPeriodic(void)
 	{
 		PollSensorData();
@@ -222,7 +212,12 @@ public:
 		else
 		{
 			// Debug manual mode
-			ManualPeriodic();
+			for(UINT8 i = 0; i < SOLENOIDS::PICKUP_PISTONS_TOP; i++)
+			{
+				m_solenoids[i]->Set(m_gamePad->GetRawButton(i+1));
+			}
+
+			m_winch->Set(0.75*m_gamePad->GetAxis(GamePad::LEFT_Y));
 		}
 		UpdateDash();
 	} // TeleopPeriodic(void)
