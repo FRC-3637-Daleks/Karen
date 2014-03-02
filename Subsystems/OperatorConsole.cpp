@@ -69,41 +69,19 @@ const bool OperatorConsole::CatapultEmergencyRelease() const
 	return (m_gamePad->GetButton(GamePad::B2));
 }
 
+/* Roller controls */
 const float OperatorConsole::GetRoller() const
 {
 	return m_gamePad->GetAxis(GamePad::PAD_Y);
 }
 
-const int OperatorConsole::GetRollerPosition()
+const bool OperatorConsole::RollerUp() const
 {
-	static bool Shoulder1 = false, Shoulder2 = false;
-	if(m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER))
-	{
-		Shoulder1 = true;
-	}
-	else if(Shoulder1)
-	{
-		Shoulder1 = false;
-		Shoulder2 = false;
-		return --rollerPos < Pickup::PICKUP_DOWN? rollerPos=0:rollerPos;
-	}
-	else if(m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER))
-	{
-		Shoulder2 = true;
-	}
-	else if(Shoulder2)
-	{
-		Shoulder2 = false;
-		Shoulder1 = false;
-		return ++rollerPos > Pickup::PICKUP_UP? rollerPos=Pickup::PICKUP_UP:rollerPos;
-	}
-	
-	return rollerPos; 
+	return m_gamePad->GetButton(GamePad::TOP_LEFT_SHOULDER);
 }
-
-const int OperatorConsole::GetRollerDirection()
+const bool OperatorConsole::RollerDown() const
 {
-	return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER)? -1:(m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER)? 1:0) ;
+	return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER);
 }
 
 const bool OperatorConsole::GetOverride()
