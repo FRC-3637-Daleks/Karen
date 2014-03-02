@@ -52,18 +52,19 @@ const float OperatorConsole::GetLeft() const
 	return (m_leftStick->GetY() < 0 && squared? -1:1) * precisionFactor * (pow(deadzone(m_leftStick->GetY()), squared? 2:1));
 }
 
-const bool OperatorConsole::Disengage() const
+/* Catapult control functions */
+const bool OperatorConsole::CatapultFire() const
 {
 	return (m_rightStick->GetRawButton(1) || m_leftStick->GetRawButton(1)) &&	// At least one trigger and
 			(m_rightStick->GetRawButton(2) || m_leftStick->GetRawButton(2));	// one top button need to be pressed
 }
 
-const bool OperatorConsole::Engage() const
+const bool OperatorConsole::CatapultPrepareFire() const
 {
 	return (m_gamePad->GetButton(GamePad::B1));
 }
 
-const bool OperatorConsole::Safe() const
+const bool OperatorConsole::CatapultEmergencyRelease() const
 {
 	return (m_gamePad->GetButton(GamePad::B2));
 }
