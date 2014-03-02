@@ -11,7 +11,6 @@ Catapult::Catapult(Talon *winch, Encoder *step,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = stop;
-	m_backOffAmt         = 100;
 	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
@@ -26,7 +25,6 @@ Catapult::Catapult(Talon &winch, Encoder &step,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = &stop;
-	m_backOffAmt         = 100;
 	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
@@ -41,7 +39,6 @@ Catapult::Catapult(UINT32 winch, UINT32 stepA, UINT32 stepB,
 	m_shift              = new Valve(shiftLow, shiftHigh, false);
 	m_latch              = new Valve(latchPinEngaged, latchPinDisengaged, true);
 	m_stop               = new DigitalInput(stop);
-	m_backOffAmt         = 100;
 	m_state              = CATAPULT_STATE_NOT_READY;
 	m_step->Start();
 }
@@ -95,7 +92,7 @@ Catapult::PrepareFire()
 		break;
 	case CATAPULT_STATE_BACKDRIVING:
 		m_winch->Set(0.5);
-		if(abs(m_step->Get() - m_encoderStart) > m_backOffAmt) {
+		if(abs(m_step->Get() - m_encoderStart) > CATAPULT_BACK_OFF_AMOUNT) {
 			m_winch->Set(0.0);
 			m_shift->Open();
 			m_state = CATAPULT_STATE_READY;
@@ -118,7 +115,7 @@ Catapult::UnprepareFire()
 	case CATAPULT_STATE_ERELEASE:
 		// Drive forward to ensure the shifter catches
 		m_winch->Set(0.3);
-		if(abs(m_step->Get() - m_encoderStart) > 10) {
+		if(abs(m_step->Get() - m_encoderStart) > CATAPULT_FORWARD_CATCH_AMOUNT) {
 #ifdef DEBUG_CATAPULT
 			printf("Catapult: Emergency Release")
 #endif
