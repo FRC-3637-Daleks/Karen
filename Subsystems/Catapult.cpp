@@ -86,6 +86,7 @@ Catapult::PrepareFire()
 #ifdef DEBUG_CATAPULT
 			printf("Catapult: Latching");
 #endif
+		m_latch->Close();
 		m_winch->Set(0.0);
 		m_encoderStart = m_step->Get();
 		m_state = CATAPULT_STATE_BACKDRIVING;
