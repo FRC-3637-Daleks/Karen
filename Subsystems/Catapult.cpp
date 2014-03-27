@@ -58,7 +58,7 @@ Catapult::Fire()
 			printf("Catapult: Firing");
 #endif
 		m_latch->Open();
-		m_state = CATAPULT_STATE_FIRING;
+		m_state = CATAPULT_STATE_NOT_READY;
 	default:
 		break;
 	}
@@ -73,7 +73,10 @@ Catapult::PrepareFire()
 		printf("Catapult: Prepare fire");
 #endif
 		m_shift->Close();
-		m_latch->Open();
+		if (m_stop->Get() == 1)
+			m_state = CATAPULT_STATE_LATCHING;
+		else
+			m_latch->Open();
 		m_state = CATAPULT_STATE_PULLING_BACK;
 		break;
 	case CATAPULT_STATE_PULLING_BACK:
@@ -122,7 +125,7 @@ Catapult::UnprepareFire()
 #endif
 			m_winch->Set(0.0);
 			m_latch->Open();
-			m_state = CATAPULT_STATE_READY;
+			m_state = CATAPULT_STATE_NOT_READY;
 		}
 		break;
 	default:
