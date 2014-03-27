@@ -77,8 +77,4 @@ public:
 	virtual ~OperatorConsole();
 };
 
-
-
-
-
 #endif
