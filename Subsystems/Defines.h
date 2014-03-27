@@ -8,6 +8,8 @@
 #define STOPPED_AND_LATCHED_ITERATIONS 10
 #define REEDWATCH_PRIORITY 150 // 0 - 255, 0 is highest
 
+#define RASPBERRY_PRIORITY 150 // 0 - 255, 0 is highest
+
 //#define DEBUG_DRIVE
 //#define DEBUG_PICKUP
 //#define DEBUG_CATAPULT
