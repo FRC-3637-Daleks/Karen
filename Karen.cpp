@@ -30,8 +30,15 @@ class Karen : public IterativeRobot
 
 	NetworkTable *m_table;
 
+	enum auton_state {
+		AUTON_STATE_PREPARE_FIRE,
+		AUTON_STATE_FIRE,
+		AUTON_STATE_FIRED
+	};
+
+	auton_state m_autonState;
+
 	// Miscellaneous variables
-	bool fired;
 	double range;
 	bool isHot;
 	Timer autonTime;
@@ -110,7 +117,8 @@ public:
 		m_compressor->Start();
 		autonTime.Stop();
 		autonTime.Reset();
-		fired = false;
+		autonTime.Start();
+		m_autonState = AUTON_STATE_PREPARE_FIRE;
 	}
 
 	void TestInit(void)
@@ -136,30 +144,32 @@ public:
 		UpdateDash();
 	}
 
-	void AutonomousPeriodic(void)
-	{
+	void AutonomousPeriodic(void) {
 		PollSensorData();
-		if(fired)
-		{
-			if(autonTime.Get() < 6.0)
-				m_dalekDrive->Drive(0.0, -0.3, 0.0);
-			else
-				m_dalekDrive->Drive(0.0, 0.0, 0.0);
-		}
-		else if(m_catapult->GetState() == Catapult::CATAPULT_STATE_NOT_READY)
-		{
+		switch (m_autonState) {
+		case AUTON_STATE_PREPARE_FIRE:
 			m_catapult->PrepareFire();
-			m_pickup->CenterArms();
-		}
-		else
-		{
-			autonTime.Start();
-			m_pickup->Down();
-			if(autonTime.Get() > 1.5)
-			{
-				fired = true;
-				m_catapult->Fire();
+			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
+				m_pickup->Down();
+				if (m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN && autonTime.Get() > 1.5) {
+					m_autonState = AUTON_STATE_FIRE;
+				}
 			}
+			break;
+		case AUTON_STATE_FIRE:
+			m_catapult->Fire();
+			if (autonTime.Get() > 1.6) {
+				m_autonState = AUTON_STATE_FIRED;
+			}
+			break;
+		case AUTON_STATE_FIRED:
+			// Now move forward
+			if(autonTime.Get() < 6.0) {
+				m_dalekDrive->Drive(0.0, -0.3, 0.0);
+			} else {
+				m_dalekDrive->Drive(0.0, 0.0, 0.0);
+			}
+			break;
 		}
 		UpdateDash();
 	}
