@@ -55,10 +55,10 @@ Catapult::Fire()
 	switch(m_state) {
 	case CATAPULT_STATE_READY:
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Firing")
+			printf("Catapult: Firing");
 #endif
 		m_latch->Open();
-		m_state = CATAPULT_STATE_FIRING;
+		m_state = CATAPULT_STATE_NOT_READY;
 	default:
 		break;
 	}
@@ -73,7 +73,10 @@ Catapult::PrepareFire()
 		printf("Catapult: Prepare fire");
 #endif
 		m_shift->Close();
-		m_latch->Open();
+		if (m_stop->Get() == 1)
+			m_state = CATAPULT_STATE_LATCHING;
+		else
+			m_latch->Open();
 		m_state = CATAPULT_STATE_PULLING_BACK;
 		break;
 	case CATAPULT_STATE_PULLING_BACK:
@@ -84,8 +87,9 @@ Catapult::PrepareFire()
 		break;
 	case CATAPULT_STATE_LATCHING:
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Latching")
+			printf("Catapult: Latching");
 #endif
+		m_latch->Close();
 		m_winch->Set(0.0);
 		m_encoderStart = m_step->Get();
 		m_state = CATAPULT_STATE_BACKDRIVING;
@@ -117,11 +121,11 @@ Catapult::UnprepareFire()
 		m_winch->Set(0.3);
 		if(abs(m_step->Get() - m_encoderStart) > CATAPULT_FORWARD_CATCH_AMOUNT) {
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Emergency Release")
+			printf("Catapult: Emergency Release");
 #endif
 			m_winch->Set(0.0);
 			m_latch->Open();
-			m_state = CATAPULT_STATE_READY;
+			m_state = CATAPULT_STATE_NOT_READY;
 		}
 		break;
 	default:

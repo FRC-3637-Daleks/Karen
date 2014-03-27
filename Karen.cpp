@@ -43,9 +43,10 @@ class Karen : public IterativeRobot
 	bool isHot;
 	Timer autonTime;
 	Timer testWait;
+	bool firing;
 
 public:
-	Karen()
+	Karen(): firing(false)
 	{
 		printf("Karen Constructor Started\n");
 
@@ -175,7 +176,6 @@ public:
 
 	void TestPeriodic(void)
 	{
-		// Nada
 		PollSensorData();
 		UpdateDash();
 	}
@@ -200,15 +200,22 @@ public:
 			// Normal Control Mode
 
 			// CATAPULT
-			if (m_operatorConsole->CatapultPrepareFire()) {
-				m_catapult->PrepareFire();
-			} else if (m_operatorConsole->CatapultEmergencyRelease()) {
+			
+			if (m_operatorConsole->CatapultEmergencyRelease())
+			{
+				firing = false;
 				m_catapult->UnprepareFire();
-			} else if (m_operatorConsole->CatapultFire() && m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN) {
+			}
+			else if (m_operatorConsole->CatapultFire()) {
 				// The catapult should only fire if the pickup arms are down
 				m_catapult->Fire();
+				firing = false;
 			}
-
+			else if (m_operatorConsole->CatapultPrepareFire() || firing) {
+				m_catapult->PrepareFire();
+				firing = true;
+			}
+			
 			// ROLLERS
 			if (m_operatorConsole->RollerUp()) {
 				m_pickup->Up();

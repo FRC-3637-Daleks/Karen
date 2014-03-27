@@ -77,11 +77,11 @@ const float OperatorConsole::GetRoller() const
 
 const bool OperatorConsole::RollerUp() const
 {
-	return m_gamePad->GetButton(GamePad::TOP_LEFT_SHOULDER);
+	return m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
 const bool OperatorConsole::RollerDown() const
 {
-	return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER);
+	return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
 }
 const bool OperatorConsole::RollerCenter() const
 {
