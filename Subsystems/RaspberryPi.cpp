@@ -107,6 +107,7 @@ RaspberryPi::setHot(bool state)
     m_isHot = state;
 }
 
+void
 RaspberryPi::setDistance(float dist)
 {
     m_distance = dist;
