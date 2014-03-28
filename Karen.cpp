@@ -33,10 +33,20 @@ class Karen : public IterativeRobot
 	enum auton_state {
 		AUTON_STATE_PREPARE_FIRE,
 		AUTON_STATE_FIRE,
-		AUTON_STATE_FIRED
+		AUTON_STATE_FIRED,
+		AUTON_STATE_LOAD_ROLLER,
+		AUTON_STATE_LOAD_ARMS,
+		AUTON_STATE_DONE
+	};
+	
+	enum auton_mode {
+		AUTON_MODE_ONE_BALL,
+		AUTON_MODE_TWO_BALL,
+		AUTON_MODE_PUSH_BALL
 	};
 
 	auton_state m_autonState;
+	auton_mode  m_autonMode;
 
 	// Miscellaneous variables
 	double range;
@@ -114,11 +124,17 @@ public:
 
 	void AutonomousInit(void)
 	{
+		m_catapult->CheckPosition();
 		m_compressor->Start();
 		autonTime.Stop();
 		autonTime.Reset();
 		autonTime.Start();
 		m_autonState = AUTON_STATE_PREPARE_FIRE;
+		m_autonMode = AUTON_MODE_ONE_BALL;
+		if(m_autonMode == AUTON_MODE_PUSH_BALL)
+		{
+			m_autonState = AUTON_STATE_DONE;
+		}
 	}
 
 	void TestInit(void)
@@ -148,6 +164,7 @@ public:
 		PollSensorData();
 		switch (m_autonState) {
 		case AUTON_STATE_PREPARE_FIRE:
+			m_pickup->SetRoller(0.0);
 			m_catapult->PrepareFire();
 			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
 				m_pickup->Down();
@@ -163,6 +180,33 @@ public:
 			}
 			break;
 		case AUTON_STATE_FIRED:
+			if(m_autonMode == AUTON_MODE_TWO_BALL)
+			{
+				m_autonMode = AUTON_MODE_ONE_BALL;
+				m_autonState = AUTON_STATE_LOAD_ROLLER;
+			}
+			else if(m_autonMode == AUTON_MODE_ONE_BALL)
+			{
+				m_autonMode = AUTON_MODE_PUSH_BALL;
+				m_autonState = AUTON_STATE_DONE;
+			}
+			break;
+		case AUTON_STATE_LOAD_ROLLER:
+			if(autonTime.Get() < 4.0)
+			{
+				m_pickup->SetRoller(-1.0);
+			}
+			else
+			{
+				m_autonState = AUTON_STATE_LOAD_ARMS;
+			}
+			break;
+		case AUTON_STATE_LOAD_ARMS:
+			m_pickup->Up();
+			autonTime.Reset();
+			m_autonState = AUTON_STATE_PREPARE_FIRE;
+			break;
+		case AUTON_STATE_DONE:
 			// Now move forward
 			if(autonTime.Get() < 6.0) {
 				m_dalekDrive->Drive(0.0, -0.3, 0.0);
