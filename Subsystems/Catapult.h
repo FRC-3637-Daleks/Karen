@@ -36,6 +36,7 @@ public:
 	void Fire();
 	void PrepareFire();
 	void UnprepareFire();
+	void CheckPosition();
 
 private:
 	catapult_state m_state;

@@ -133,4 +133,13 @@ Catapult::UnprepareFire()
 	}
 }
 
+void
+Catapult::CheckPosition()
+{
+	if(m_stop->Get() == 1)
+	{
+		m_state = CATAPULT_STATE_LATCHING;
+	}
+}
+
 
