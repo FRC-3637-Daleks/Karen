@@ -56,7 +56,7 @@ class Karen : public IterativeRobot
 	bool firing;
 
 public:
-	Karen(): firing(false)
+	Karen(): isHot(false),firing(false)
 	{
 		printf("Karen Constructor Started\n");
 
@@ -169,7 +169,9 @@ public:
 			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
 				m_pickup->Down();
 				if (m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN && autonTime.Get() > 1.5) {
-					m_autonState = AUTON_STATE_FIRE;
+					if(isHot) {
+						m_autonState = AUTON_STATE_FIRE;
+					}
 				}
 			}
 			break;
@@ -286,8 +288,16 @@ public:
 private:
 	void PollSensorData()
 	{
-		if(m_ultraSonicSensor)
+		if(m_table)
+		{
+			isHot = m_table->GetBoolean("ishot");
+			range = m_table->GetNumber("range");
+		}
+		else if(m_ultraSonicSensor)
+		{
+			isHot = true;
 			range = m_ultraSonicSensor->GetRangeInInches();
+		}
 	}
 
 	void UpdateDash()
@@ -310,6 +320,7 @@ private:
 			break;
 		}
 		SmartDashboard::PutNumber("Range", range); // Make at least hard print, at best progress bar with print
+		SmartDashboard::PutBoolean("Hot", isHot);
 
 		SmartDashboard::PutNumber("X", m_operatorConsole->GetX());
 		SmartDashboard::PutNumber("Y", m_operatorConsole->GetY());
