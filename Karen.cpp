@@ -56,7 +56,7 @@ class Karen : public IterativeRobot
 	bool firing;
 
 public:
-	Karen(): firing(false)
+	Karen(): isHot(false),firing(false)
 	{
 		printf("Karen Constructor Started\n");
 
@@ -104,6 +104,7 @@ public:
 		}
 		catch(exception e)
 		{
+			m_table = NULL;
 		}
 		printf("Karen Constructor Completed\n");
 	}
@@ -164,12 +165,15 @@ public:
 		PollSensorData();
 		switch (m_autonState) {
 		case AUTON_STATE_PREPARE_FIRE:
+			printf("AUTON_STATE_PREPARING FIRE");
 			m_pickup->SetRoller(0.0);
 			m_catapult->PrepareFire();
 			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
 				m_pickup->Down();
 				if (m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN && autonTime.Get() > 1.5) {
-					m_autonState = AUTON_STATE_FIRE;
+					if(isHot || autonTime.Get() > 5.0) {
+						m_autonState = AUTON_STATE_FIRE;
+					}
 				}
 			}
 			break;
@@ -208,7 +212,8 @@ public:
 			break;
 		case AUTON_STATE_DONE:
 			// Now move forward
-			if(autonTime.Get() < 6.0) {
+			autonTime.Reset();
+			if(autonTime.Get() < 2.0) {
 				m_dalekDrive->Drive(0.0, -0.3, 0.0);
 			} else {
 				m_dalekDrive->Drive(0.0, 0.0, 0.0);
@@ -286,8 +291,24 @@ public:
 private:
 	void PollSensorData()
 	{
-		if(m_ultraSonicSensor)
-			range = m_ultraSonicSensor->GetRangeInInches();
+		try
+		{
+			if(m_table)
+			{
+				isHot = m_table->GetBoolean("ishot");
+				//range = m_table->GetNumber("range");
+			}
+			else if(m_ultraSonicSensor)
+			{
+				isHot = true;
+				//range = m_ultraSonicSensor->GetRangeInInches();
+			}
+		}
+		catch(exception e)
+		{
+			printf(e.what());
+			isHot = true;
+		}
 	}
 
 	void UpdateDash()
@@ -310,6 +331,7 @@ private:
 			break;
 		}
 		SmartDashboard::PutNumber("Range", range); // Make at least hard print, at best progress bar with print
+		SmartDashboard::PutBoolean("Hot", isHot);
 
 		SmartDashboard::PutNumber("X", m_operatorConsole->GetX());
 		SmartDashboard::PutNumber("Y", m_operatorConsole->GetY());
