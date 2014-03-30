@@ -128,7 +128,7 @@ public:
 		m_catapult->CheckPosition();
 		m_compressor->Start();
 		autonTime.Stop();
-		autonTime.Reset();
+		resetAuton();
 		autonTime.Start();
 		m_autonState = AUTON_STATE_PREPARE_FIRE;
 		m_autonMode = AUTON_MODE_ONE_BALL;
@@ -193,6 +193,7 @@ public:
 			{
 				m_autonMode = AUTON_MODE_PUSH_BALL;
 				m_autonState = AUTON_STATE_DONE;
+				resetAuton();
 			}
 			break;
 		case AUTON_STATE_LOAD_ROLLER:
@@ -207,13 +208,12 @@ public:
 			break;
 		case AUTON_STATE_LOAD_ARMS:
 			m_pickup->Up();
-			autonTime.Reset();
+			resetAuton();
 			m_autonState = AUTON_STATE_PREPARE_FIRE;
 			break;
 		case AUTON_STATE_DONE:
 			// Now move forward
-			autonTime.Reset();
-			if(autonTime.Get() < 2.0) {
+			if(autonTime.Get() < 3.0) {
 				m_dalekDrive->Drive(0.0, -0.3, 0.0);
 			} else {
 				m_dalekDrive->Drive(0.0, 0.0, 0.0);
@@ -338,6 +338,15 @@ private:
 		SmartDashboard::PutNumber("Theta", m_operatorConsole->GetTheta());
 
 	}
+	
+private:
+	void resetAuton()
+	{
+		autonTime.Reset();
+		printf("Resetting auto time\n");
+	}
+	
+	
 };
 
 START_ROBOT_CLASS(Karen);
