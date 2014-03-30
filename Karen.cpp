@@ -213,7 +213,7 @@ public:
 			break;
 		case AUTON_STATE_DONE:
 			// Now move forward
-			if(autonTime.Get() < 2.0) {
+			if(autonTime.Get() < 3.0) {
 				m_dalekDrive->Drive(0.0, -0.3, 0.0);
 			} else {
 				m_dalekDrive->Drive(0.0, 0.0, 0.0);
