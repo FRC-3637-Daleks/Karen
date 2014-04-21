@@ -104,6 +104,7 @@ public:
 		}
 		catch(exception e)
 		{
+			m_table = NULL;
 		}
 		printf("Karen Constructor Completed\n");
 	}
@@ -127,7 +128,7 @@ public:
 		m_catapult->CheckPosition();
 		m_compressor->Start();
 		autonTime.Stop();
-		autonTime.Reset();
+		resetAuton();
 		autonTime.Start();
 		m_autonState = AUTON_STATE_PREPARE_FIRE;
 		m_autonMode = AUTON_MODE_ONE_BALL;
@@ -164,12 +165,13 @@ public:
 		PollSensorData();
 		switch (m_autonState) {
 		case AUTON_STATE_PREPARE_FIRE:
+			printf("AUTON_STATE_PREPARING FIRE");
 			m_pickup->SetRoller(0.0);
 			m_catapult->PrepareFire();
 			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
 				m_pickup->Down();
 				if (m_pickup->GetState() == Pickup::PICKUP_STATE_DOWN && autonTime.Get() > 1.5) {
-					if(isHot) {
+					if(isHot || autonTime.Get() > 5.0) {
 						m_autonState = AUTON_STATE_FIRE;
 					}
 				}
@@ -191,6 +193,7 @@ public:
 			{
 				m_autonMode = AUTON_MODE_PUSH_BALL;
 				m_autonState = AUTON_STATE_DONE;
+				resetAuton();
 			}
 			break;
 		case AUTON_STATE_LOAD_ROLLER:
@@ -205,12 +208,12 @@ public:
 			break;
 		case AUTON_STATE_LOAD_ARMS:
 			m_pickup->Up();
-			autonTime.Reset();
+			resetAuton();
 			m_autonState = AUTON_STATE_PREPARE_FIRE;
 			break;
 		case AUTON_STATE_DONE:
 			// Now move forward
-			if(autonTime.Get() < 6.0) {
+			if(autonTime.Get() < 3.0) {
 				m_dalekDrive->Drive(0.0, -0.3, 0.0);
 			} else {
 				m_dalekDrive->Drive(0.0, 0.0, 0.0);
@@ -288,15 +291,23 @@ public:
 private:
 	void PollSensorData()
 	{
-		if(m_table)
+		try
 		{
-			isHot = m_table->GetBoolean("ishot");
-			range = m_table->GetNumber("range");
+			if(m_table)
+			{
+				isHot = m_table->GetBoolean("ishot");
+				//range = m_table->GetNumber("range");
+			}
+			else if(m_ultraSonicSensor)
+			{
+				isHot = true;
+				//range = m_ultraSonicSensor->GetRangeInInches();
+			}
 		}
-		else if(m_ultraSonicSensor)
+		catch(exception e)
 		{
+			printf(e.what());
 			isHot = true;
-			range = m_ultraSonicSensor->GetRangeInInches();
 		}
 	}
 
@@ -327,6 +338,15 @@ private:
 		SmartDashboard::PutNumber("Theta", m_operatorConsole->GetTheta());
 
 	}
+	
+private:
+	void resetAuton()
+	{
+		autonTime.Reset();
+		printf("Resetting auto time\n");
+	}
+	
+	
 };
 
 START_ROBOT_CLASS(Karen);
