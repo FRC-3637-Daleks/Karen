@@ -28,16 +28,16 @@ private:
 	bool manual;
 	
 public:
-	OperatorConsole(const Drive_t driveConfig, Joystick *left, Joystick *right, GamePad *pad): 
-		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), 
+	OperatorConsole(const Drive_t driveConfig, Joystick *left, Joystick *right, GamePad *pad, const bool driver): 
+		drive(driveConfig), m_leftStick(left), m_rightStick(right), m_gamePad(pad), allocated(false), oneDriver(driver),
 		squared(true), precisionFactor(1.0), engaged(false), manual(false) {};
 	
-	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad):
-		drive(driveConfig), m_leftStick(&left), m_rightStick(&right), m_gamePad(&pad), allocated(false), 
+	OperatorConsole(const Drive_t driveConfig, Joystick &left, Joystick &right, GamePad &pad, const bool driver):
+		drive(driveConfig), m_leftStick(&left), m_rightStick(&right), m_gamePad(&pad), allocated(false), oneDriver(driver),
 		squared(true), precisionFactor(1.0), engaged(false), manual(false) {};
 	
-	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad):
-		drive(driveConfig), m_leftStick(new Joystick(left)), m_rightStick(new Joystick(right)), m_gamePad(new GamePad(pad)), allocated(true),
+	OperatorConsole(const Drive_t driveConfig, const UINT8 left, const UINT8 right, const UINT8 pad, const bool driver):
+		drive(driveConfig), m_leftStick(new Joystick(left)), m_rightStick(new Joystick(right)), m_gamePad(new GamePad(pad)), allocated(true), oneDriver(driver),
 		squared(true), precisionFactor(1.0), engaged(false), manual(false) {};
 	
 public:
