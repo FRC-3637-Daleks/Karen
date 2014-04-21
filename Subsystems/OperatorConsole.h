@@ -19,6 +19,7 @@ private:
 	Joystick *m_leftStick, *m_rightStick;
 	GamePad *m_gamePad;
 	bool allocated;
+	bool oneDriver;
 	
 private:
 	bool squared;

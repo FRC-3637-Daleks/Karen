@@ -55,33 +55,55 @@ const float OperatorConsole::GetLeft() const
 /* Catapult control functions */
 const bool OperatorConsole::CatapultFire() const
 {
-	return (m_rightStick->GetRawButton(1) || m_leftStick->GetRawButton(1)) &&	// At least one trigger and
-			(m_rightStick->GetRawButton(2) || m_leftStick->GetRawButton(2));	// one top button need to be pressed
+	if(oneDriver)
+		return (m_rightStick->GetRawButton(1) && m_leftStick->GetRawButton(1));  // PLEASE NOTE: FIRING IS NOW DONE WITH THIS CONFIGURATION 
+	else
+		return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER) && m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER);
 }
 
 const bool OperatorConsole::CatapultPrepareFire() const
 {
-	return (m_gamePad->GetButton(GamePad::B1));
+	if(oneDriver)
+		return m_leftStick->GetRawButton(5) || m_rightStick->GetRawButton(4);
+	else
+		return (m_gamePad->GetButton(GamePad::B1));
 }
 
 const bool OperatorConsole::CatapultEmergencyRelease() const
 {
-	return (m_gamePad->GetButton(GamePad::B2));
+	if(oneDriver)
+		return m_leftStick->GetRawButton(7) || m_rightStick->GetRawButton(10);
+	else
+		return (m_gamePad->GetButton(GamePad::B2));
 }
 
 /* Roller controls */
 const float OperatorConsole::GetRoller() const
 {
-	return m_gamePad->GetAxis(GamePad::PAD_Y);
+	if(oneDriver)
+		if(m_leftStick->GetRawButton(2))
+			return 1.0;
+		else if(m_leftStick->GetRawButton(3))
+			return -1.0;
+		else
+			return 0.0;
+	else
+		return m_gamePad->GetAxis(GamePad::PAD_Y);
 }
 
 const bool OperatorConsole::RollerUp() const
 {
-	return m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER);
+	if(oneDriver)
+		return m_rightStick->GetRawButton(2);
+	else
+		return m_gamePad->GetButton(GamePad::TOP_RIGHT_SHOULDER);
 }
 const bool OperatorConsole::RollerDown() const
 {
-	return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
+	if(oneDriver)
+		return m_rightStick->GetRawButton(2);
+	else
+		return m_gamePad->GetButton(GamePad::BOTTOM_RIGHT_SHOULDER);
 }
 const bool OperatorConsole::RollerCenter() const
 {
