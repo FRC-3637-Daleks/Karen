@@ -58,7 +58,7 @@ const bool OperatorConsole::CatapultFire() const
 	if(oneDriver)
 		return (m_rightStick->GetRawButton(1) && m_leftStick->GetRawButton(1));  // PLEASE NOTE: FIRING IS NOW DONE WITH THIS CONFIGURATION 
 	else
-		return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER) && m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER);
+		return m_gamePad->GetButton(GamePad::BOTTOM_LEFT_SHOULDER) && m_gamePad->GetButton(GamePad::TOP_LEFT_SHOULDER);
 }
 
 const bool OperatorConsole::CatapultPrepareFire() const

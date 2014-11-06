@@ -87,7 +87,7 @@ public:
 		(*m_dalekDrive)[DalekDrive::RIGHT_REAR].SetFlip(false);
 
 		// Define joysticks on the Drivers Station
-		m_operatorConsole = new OperatorConsole(OperatorConsole::ARCADE_DRIVE, m_leftStick, m_rightStick, m_gamePad, true);
+		m_operatorConsole = new OperatorConsole(OperatorConsole::ARCADE_DRIVE, m_leftStick, m_rightStick, m_gamePad, false);
 
 		// Define catapult members
 		m_catapult = 	new Catapult(m_winch, m_winchPos, m_solenoids[SOLENOIDS::CLUTCH_ON-1], m_solenoids[SOLENOIDS::CLUTCH_OFF-1],
