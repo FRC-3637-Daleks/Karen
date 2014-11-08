@@ -77,6 +77,14 @@ const bool OperatorConsole::CatapultEmergencyRelease() const
 		return (m_gamePad->GetButton(GamePad::B2));
 }
 
+const bool OperatorConsole::CatapultEmergencyLatch() const
+{
+	if(oneDriver)
+		return (m_rightStick->GetRawButton(3));
+	else
+		return (m_gamePad->GetButton(GamePad::B3));
+}
+
 /* Roller controls */
 const float OperatorConsole::GetRoller() const
 {

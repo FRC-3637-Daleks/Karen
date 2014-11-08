@@ -51,6 +51,12 @@ Catapult::GetState()
 }
 
 void
+Catapult::SetState(const catapult_state state)
+{
+	m_state = state;
+}
+
+void
 Catapult::Fire()
 {
 	switch(m_state) {

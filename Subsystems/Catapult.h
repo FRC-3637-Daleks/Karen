@@ -33,6 +33,7 @@ public:
 	};
 
 	catapult_state GetState();
+	void SetState(const catapult_state state);
 	void Fire();
 	void PrepareFire();
 	void UnprepareFire();

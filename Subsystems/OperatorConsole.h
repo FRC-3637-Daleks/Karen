@@ -50,6 +50,7 @@ public:
 	const bool CatapultFire() const;
 	const bool CatapultPrepareFire() const;
 	const bool CatapultEmergencyRelease() const;
+	const bool CatapultEmergencyLatch() const;
 	
 	const float GetRoller() const;		// returns roller velocity input
 	const bool RollerUp() const;

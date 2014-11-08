@@ -265,6 +265,10 @@ public:
 				firing = true;
 			}
 			
+			if(m_operatorConsole->CatapultEmergencyLatch()) {
+				m_catapult->SetState(Catapult::CATAPULT_STATE_LATCHING);
+			}
+
 			// ROLLERS
 			if (m_operatorConsole->RollerUp()) {
 				m_pickup->Up();
