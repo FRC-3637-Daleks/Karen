@@ -51,22 +51,26 @@ void Pickup::Up() {
 	Unlock();
 	m_state = PICKUP_STATE_UP;
 	m_direction->Close();
+	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Up");
 }
 
 void Pickup::Down() {
 	Unlock();
 	m_state = PICKUP_STATE_DOWN;
 	m_direction->Open();
+	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Down");
 }
 
 void Pickup::Lock() {
 	m_stop->Set(true);
 	m_move->Set(false);
+	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Lock");
 }
 
 void Pickup::Unlock() {
 	m_stop->Set(false);
 	m_move->Set(true);
+	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Unlock");
 }
 
 bool Pickup::CenterArms() {
@@ -95,7 +99,7 @@ void Pickup::CheckArms() {
 	// Lock arms immediately when reached middle position. Must be done here to catch the reed switch.
 	if (m_targetMiddle && (!m_middleLeftReed->Get() || !m_middleRightReed->Get())) {
 #ifdef DEBUG_PICKUP
-		printf("Pickup: Reeds triggered latch");
+				log(SERVICE::PNEUMATICS, LEVEL::INFO, "Pickup: Reeds triggered latch");
 #endif
 		Lock();
 		m_state = PICKUP_STATE_MIDDLE;

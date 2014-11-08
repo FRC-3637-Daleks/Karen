@@ -4,6 +4,7 @@
 #include "Defines.h"
 #include "WPILib.h"
 #include "Valve.h"
+#include "Logger.h"
 
 
 class Pickup
