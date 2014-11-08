@@ -58,7 +58,7 @@ class Karen : public IterativeRobot
 public:
 	Karen(): isHot(false),firing(false)
 	{
-		printf("Karen Constructor Started\n");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Karen Constructor Started\n");
 
 		m_compressor = 	new Compressor(DIO_PORTS::PRESSURE_SWITCH, RELAY_PORTS::COMPRESSER_RELAY);
 
@@ -106,16 +106,16 @@ public:
 		{
 			m_table = NULL;
 		}
-		printf("Karen Constructor Completed\n");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Karen Constructor Completed\n");
 	}
 
 	/********************************** Init Routines *************************************/
 
 	void RobotInit(void)
 	{
-		printf("Built: %s %s\n", __DATE__, __TIME__);
+		log(SERVICE::GENERAL, LEVEL::INFO, "Built: " __DATE__ " " __TIME__ "\n");
 		SmartDashboard::init();
-		printf("RobotInit() completed.\n");
+		log(SERVICE::GENERAL, LEVEL::INFO, "RobotInit() completed.\n");
 	}
 
 	void DisabledInit(void)
@@ -165,7 +165,7 @@ public:
 		PollSensorData();
 		switch (m_autonState) {
 		case AUTON_STATE_PREPARE_FIRE:
-			printf("AUTON_STATE_PREPARING FIRE");
+			log(SERVICE::GENERAL, LEVEL::INFO, "AUTON_STATE_PREPARING FIRE");
 			m_pickup->SetRoller(0.0);
 			m_catapult->PrepareFire();
 			if (m_catapult->GetState() == Catapult::CATAPULT_STATE_READY) {
@@ -343,7 +343,7 @@ private:
 	void resetAuton()
 	{
 		autonTime.Reset();
-		printf("Resetting auto time\n");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Resetting auto time\n");
 	}
 	
 	

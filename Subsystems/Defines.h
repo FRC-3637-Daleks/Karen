@@ -12,6 +12,6 @@
 
 //#define DEBUG_DRIVE
 //#define DEBUG_PICKUP
-//#define DEBUG_CATAPULT
+#define DEBUG_CATAPULT
 
 #endif /*_DEFINES_H_*/

@@ -1,5 +1,6 @@
 #include "WPILib.h"
 #include "Catapult.h"
+#include "Logger.h"
 
 Catapult::Catapult(Talon *winch, Encoder *step,
 	Solenoid *shiftLow, Solenoid *shiftHigh, 
@@ -55,7 +56,7 @@ Catapult::Fire()
 	switch(m_state) {
 	case CATAPULT_STATE_READY:
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Firing");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Firing");
 #endif
 		m_latch->Open();
 		m_state = CATAPULT_STATE_NOT_READY;
@@ -70,7 +71,7 @@ Catapult::PrepareFire()
 	switch(m_state) {
 	case CATAPULT_STATE_NOT_READY:
 #ifdef DEBUG_CATAPULT
-		printf("Catapult: Prepare fire");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Prepare fire");
 #endif
 		m_shift->Close();
 		if (m_stop->Get() == 1)
@@ -87,7 +88,7 @@ Catapult::PrepareFire()
 		break;
 	case CATAPULT_STATE_LATCHING:
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Latching");
+		log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Latching");
 #endif
 		m_latch->Close();
 		m_winch->Set(0.0);
@@ -121,7 +122,7 @@ Catapult::UnprepareFire()
 		m_winch->Set(0.3);
 		if(abs(m_step->Get() - m_encoderStart) > CATAPULT_FORWARD_CATCH_AMOUNT) {
 #ifdef DEBUG_CATAPULT
-			printf("Catapult: Emergency Release");
+			log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Emergency Release");
 #endif
 			m_winch->Set(0.0);
 			m_latch->Open();

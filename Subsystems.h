@@ -8,6 +8,7 @@
 #include "Subsystems/Catapult.h"
 #include "Subsystems/DalekDrive.h"
 #include "Subsystems/OperatorConsole.h"
+#include "Subsystems/Logger.h"
 
 //#define SHIT_MODE 1
 
