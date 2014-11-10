@@ -102,6 +102,9 @@ Catapult::PrepareFire()
 		m_state = CATAPULT_STATE_BACKDRIVING;
 		break;
 	case CATAPULT_STATE_BACKDRIVING:
+#ifdef DEBUG_CATAPULT
+		log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Backdriving");
+#endif
 		m_winch->Set(0.5);
 		if(abs(m_step->Get() - m_encoderStart) > CATAPULT_BACK_OFF_AMOUNT) {
 			m_winch->Set(0.0);

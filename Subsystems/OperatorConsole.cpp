@@ -115,7 +115,7 @@ const bool OperatorConsole::RollerDown() const
 }
 const bool OperatorConsole::RollerCenter() const
 {
-	return m_gamePad->GetButton(GamePad::B4);
+	return m_gamePad->GetButton(GamePad::START);
 }
 
 const bool OperatorConsole::GetOverride()
