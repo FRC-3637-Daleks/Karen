@@ -64,13 +64,11 @@ void Pickup::Down() {
 void Pickup::Lock() {
 	m_stop->Set(true);
 	m_move->Set(false);
-	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Lock");
 }
 
 void Pickup::Unlock() {
 	m_stop->Set(false);
 	m_move->Set(true);
-	log(SERVICE::GENERAL, LEVEL::INFO, "Roller Arms: Unlock");
 }
 
 bool Pickup::CenterArms() {
