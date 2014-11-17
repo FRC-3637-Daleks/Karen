@@ -80,7 +80,7 @@ Catapult::PrepareFire()
 		log(SERVICE::GENERAL, LEVEL::INFO, "Catapult: Prepare fire");
 #endif
 		m_shift->Close();
-		if (m_stop->Get() == 1)
+		if (m_stop->Get() == 0)
 			m_state = CATAPULT_STATE_LATCHING;
 		else
 			m_latch->Open();
@@ -88,7 +88,7 @@ Catapult::PrepareFire()
 		break;
 	case CATAPULT_STATE_PULLING_BACK:
 		m_winch->Set(-0.7);
-		if (m_stop->Get() == 1) {
+		if (m_stop->Get() == 0) {
 			m_state = CATAPULT_STATE_LATCHING;
 		}
 		break;
@@ -146,7 +146,7 @@ Catapult::UnprepareFire()
 void
 Catapult::CheckPosition()
 {
-	if(m_stop->Get() == 1)
+	if(m_stop->Get() == 0)
 	{
 		m_state = CATAPULT_STATE_LATCHING;
 	}
